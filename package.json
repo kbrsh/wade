@@ -1,0 +1,34 @@
+{
+  "name": "wade",
+  "version": "0.0.0",
+  "description": "Blazing fast, 1kb search library",
+  "main": "dist/wade.min.js",
+  "scripts": {
+    "build": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KingPixil/wade.git"
+  },
+  "keywords": [
+    "search",
+    "wade",
+    "fast",
+    "light"
+  ],
+  "author": "Kabir Shah",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/KingPixil/wade/issues"
+  },
+  "homepage": "https://github.com/KingPixil/wade#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-header": "^1.8.8",
+    "gulp-include": "^2.3.1",
+    "gulp-replace": "^0.5.4",
+    "gulp-size": "^2.1.0",
+    "gulp-uglify": "^3.0.0"
+  }
+}
