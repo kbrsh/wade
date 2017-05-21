@@ -8,7 +8,17 @@
   /* ======= Global Wade ======= */
   (typeof module === "object" && module.exports) ? module.exports = factory() : root.Wade = factory();
 }(this, function() {
-    var createTable = function(item, length) {
+    var containsChar = function(item, data) {
+      var match = false;
+      for(var i = 0; i < data.length; i++) {
+        if(item === data[i]) {
+          match = true;
+        }
+      }
+      return match;
+    }
+    
+    var createSinglePatternTable = function(item, length) {
     	var table = {};
     
       for(var i = 0; i < length - 1; i++) {
@@ -18,7 +28,7 @@
       return table;
     }
     
-    var contains = function(item, itemLength, table, data) {
+    var containsPattern = function(item, itemLength, table, data) {
       var dataLength = data.length;
     
       var i = 0;
@@ -78,38 +88,39 @@
     var Wade = function(data) {
       var search = function(item) {
         var data = search.data;
+        var dataLength = data.length;
         var keywords = Wade.process(item).split(" ");
         var keywordsLength = keywords.length;
-        var lengths = new Array(keywordsLength);
-        var tables = new Array(keywordsLength);
         var results = [];
     
-        for(var i = 0; i < keywordsLength; i++) {
-          var keyword = keywords[i];
-          var length = keyword.length;
-          lengths[i] = length;
-          tables[i] = createTable(keyword, length);
-        }
+        if(keywordsLength !== 0) {
+          if(keywordsLength === 1) {
+            var keyword = keywords[0];
+            var keywordLength = keyword.length;
     
-        for(var i = 0; i < data.length; i++) {
-          var score = 0;
-          var chunk = data[i];
-    
-          for(var j = 0; j < keywordsLength; j++) {
-            if(contains(keywords[j], lengths[j], tables[j], chunk) === true) {
-              score++;
+            if(keywordLength === 1) {
+              for(var i = 0; i < dataLength; i++) {
+                if(containsChar(keyword, data[i]) === true) {
+                  results.push({
+                    index: i,
+                    score: 1
+                  });
+                }
+              }
+            } else {
+              var table = createSinglePatternTable(keyword, keywordLength);
+              for(var i = 0; i < dataLength; i++) {
+                if(containsPattern(keyword, keywordLength, table, data[i]) === true) {
+                  results.push({
+                    index: i,
+                    score: 1
+                  });
+                }
+              }
             }
           }
-    
-          score = score / keywordsLength;
-    
-          if(score > 0) {
-            results.push({
-              index: i,
-              score: score
-            });
-          }
-    
+        } else {
+          
         }
     
         return results;
