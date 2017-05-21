@@ -78,14 +78,14 @@
     var Wade = function(data) {
       var search = function(item) {
         var data = search.data;
-        var keywords = item.split(" ");
+        var keywords = Wade.process(item).split(" ");
         var keywordsLength = keywords.length;
         var lengths = new Array(keywordsLength);
         var tables = new Array(keywordsLength);
         var results = [];
     
         for(var i = 0; i < keywordsLength; i++) {
-          var keyword = Wade.process(keywords[i]);
+          var keyword = keywords[i];
           var length = keyword.length;
           lengths[i] = length;
           tables[i] = createTable(keyword, length);
