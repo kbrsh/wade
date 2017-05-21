@@ -28,7 +28,12 @@ Now you can search for a substring within the array, and Wade will return the in
 
 ```js
 search("App");
-// => 0 (Index of "Apple")
+/*
+[{
+  index: 0,
+  score: 1
+}]
+*/
 ```
 
 Combined with libraries like [Moon](http://moonjs.ga), you can create a simple real-time search.

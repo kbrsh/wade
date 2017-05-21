@@ -27,6 +27,8 @@ var contains = function(item, str, table) {
   var n = str.length;
   var searchable = n - m + 1;
 
+  var table = createTable(item);
+
   var match = false;
 
   for(var i = 0; i < searchable; i++) {
@@ -59,27 +61,50 @@ var contains = function(item, str, table) {
 var Wade = function(data) {
   var search = function(item) {
     var data = search.data;
-    var tables = search.tables;
+    var keywords = item.split(" ");
+    var keywordsLength = keywords.length;
     var results = [];
 
     for(var i = 0; i < data.length; i++) {
-      if(contains(item, data[i], tables[i]) === true) {
-        results.push(i);
+      var score = 0;
+      var chunk = data[i];
+
+      for(var j = 0; j < keywordsLength; j++) {
+        if(contains(keywords[j], chunk) === true) {
+          score++;
+        }
       }
+
+      score = score / keywordsLength;
+
+      if(score > 0) {
+        results.push({
+          index: i,
+          score: score
+        });
+      }
+
     }
 
     return results;
   }
 
-  var tables = new Array(data.length);
-  for(var i = 0; i < data.length; i++) {
-    tables[i] = createTable(data[i]);
-  }
-
-  search.tables = tables;
   search.data = data;
 
   return search;
+}
+
+Wade.normalize = function(item) {
+  return item.toLowerCase();
+}
+
+Wade.normalizeAll = function(data) {
+  for(var i = 0; i < data.length; i++) {
+    var item = data[i];
+    data[i] = Wade.normalize(item);
+  }
+
+  return data;
 }
 
 Wade.version = "__VERSION__";
