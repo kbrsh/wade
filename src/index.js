@@ -57,6 +57,20 @@ var containsPattern = function(item, itemLength, table, data) {
   return match;
 }
 
+var addMultiplePatternTrie = function(parent, id, item) {
+  var node = parent;
+	for(var i = item.length - 1; i > 0; i--) {
+    var newNode = node[item[i]];
+    newNode = newNode === undefined ? {} : newNode;
+  	node[item[i]] = newNode;
+    node = newNode;
+  }
+
+  node[item[0]] = {
+    id: id
+  }
+}
+
 var lowercase = function(str) {
   return str.toLowerCase();
 }
@@ -110,7 +124,10 @@ var Wade = function(data) {
         }
       }
     } else {
-      
+      var trie = {};
+      for(var i = 0; i < keywordsLength; i++) {
+        addMultiplePatternTrie(trie, i, keywords[i]);
+      }
     }
 
     return results;
