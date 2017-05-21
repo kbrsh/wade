@@ -58,8 +58,9 @@ var Wade = function(data) {
 
     for(var i = 0; i < keywordsLength; i++) {
       var keyword = keywords[i];
-      lengths[i] = keyword.length;
-      tables[i] = createTable(keyword);
+      var length = keyword.length;
+      lengths[i] = length;
+      tables[i] = createTable(keyword, length);
     }
 
     for(var i = 0; i < data.length; i++) {
