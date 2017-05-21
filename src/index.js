@@ -1,57 +1,46 @@
 var createTable = function(item, length) {
-  var table = new Array(length);
-  table[0] = 0;
+	var table = {};
 
-  for(var i = 1; i < length; i++) {
-    var section = item.substring(0, i + 1);
-    var sectionLength = section.length;
-    var val = 0;
-
-    for(var j = sectionLength - 1; j > 0; j--) {
-    	var prefix = section.substring(0, j);
-      var suffix = section.slice(-j);
-      if(prefix === suffix) {
-      	val = prefix.length;
-        break;
-      }
-    }
-
-    table[i] = val;
+  for(var i = 0; i < length - 1; i++) {
+  	table[item[i]] = length - i - 1;
   }
 
   return table;
 }
 
-var contains = function(item, str, table) {
-	var m = item.length;
-  var n = str.length;
-  var searchable = n - m + 1;
+var contains = function(item, itemLength, table, data) {
+  var dataLength = data.length;
 
-  var table = createTable(item);
+  var i = 0;
+  var length = dataLength - itemLength + 1;
 
   var match = false;
 
-  for(var i = 0; i < searchable; i++) {
-  	var partial = "";
+  if(itemLength !== 0) {
+    while(i < length) {
+    	for(var j = itemLength - 1; j >= 0; j--) {
+      	var char = item[j];
+        var target = data[j + i];
 
-  	for(var j = 0; j < m; j++) {
-    	var char = item[j];
-    	if(char === str[i + j]) {
-      	match = true;
-        partial += char;
-      } else {
-      	match = false;
-        break;
+        if(char === target) {
+        	match = true;
+        } else {
+        	var shift = table[target];
+
+          if(shift === undefined) {
+          	i += j + 1;
+          } else {
+          	i += shift;
+          }
+
+          match = false;
+  				break;
+        }
       }
-    }
 
-  	var partialLength = partial.length;
-    var tableValue = undefined;
-    var skip = 0;
-    if(match === true) {
-    	break;
-    } else if(partialLength !== 0 && (tableValue = table[partialLength - 1]) > 0 && (skip = partialLength - table[partialLength - 1]) > 0) {
-    	i += skip;
+      if(match === true) {
+      	break;
+      }
     }
   }
 
@@ -63,14 +52,22 @@ var Wade = function(data) {
     var data = search.data;
     var keywords = item.split(" ");
     var keywordsLength = keywords.length;
+    var lengths = new Array(keywordsLength);
+    var tables = new Array(keywordsLength);
     var results = [];
+
+    for(var i = 0; i < keywordsLength; i++) {
+      var keyword = keywords[i];
+      lengths[i] = keyword.length;
+      tables[i] = createTable(keyword);
+    }
 
     for(var i = 0; i < data.length; i++) {
       var score = 0;
       var chunk = data[i];
 
       for(var j = 0; j < keywordsLength; j++) {
-        if(contains(keywords[j], chunk) === true) {
+        if(contains(keywords[j], lengths[j], tables[j], chunk) === true) {
           score++;
         }
       }
