@@ -158,11 +158,11 @@ var Wade = function(data) {
     } else {
       var trie = {};
       var table = {};
-      var itemLength = 0;
+      var itemLength = keywords[0].length;
       for(var i = 0; i < keywordsLength; i++) {
         var keyword = keywords[i];
         var keywordLength = keyword.length;
-        if(keywordLength > itemLength) {
+        if(keywordLength !== 0 && keywordLength < itemLength) {
           itemLength = keywordLength;
         }
         addMultiplePatternTrie(trie, i, keyword);

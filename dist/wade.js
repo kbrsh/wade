@@ -168,18 +168,18 @@
         } else {
           var trie = {};
           var table = {};
-          var itemLength = 0;
+          var itemLength = keywords[0].length;
           for(var i = 0; i < keywordsLength; i++) {
             var keyword = keywords[i];
             var keywordLength = keyword.length;
-            if(keywordLength > itemLength) {
+            if(keywordLength !== 0 && keywordLength < itemLength) {
               itemLength = keywordLength;
             }
             addMultiplePatternTrie(trie, i, keyword);
           }
           addMultiplePatternTable(table, trie);
           for(var i = 0; i < dataLength; i++) {
-            if(containsMultiplePatterns(keywords[i], trie, table, data[i]) === true) {
+            if(containsMultiplePatterns(keywords[i], itemLength, trie, table, data[i]) === true) {
               results.push({
                 index: i,
                 score: 1
