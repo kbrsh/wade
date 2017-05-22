@@ -26,31 +26,29 @@ var containsPattern = function(item, itemLength, table, data) {
 
   var match = false;
 
-  if(itemLength !== 0) {
-    while(i < length) {
-    	for(var j = itemLength - 1; j >= 0; j--) {
-      	var char = item[j];
-        var target = data[j + i];
+  while(i < length) {
+    for(var j = itemLength - 1; j >= 0; j--) {
+      var char = item[j];
+      var target = data[j + i];
 
-        if(char === target) {
-        	match = true;
+      if(char === target) {
+        match = true;
+      } else {
+        var shift = table[target];
+
+        if(shift === undefined) {
+          i += j + 1;
         } else {
-        	var shift = table[target];
-
-          if(shift === undefined) {
-          	i += j + 1;
-          } else {
-          	i += shift;
-          }
-
-          match = false;
-  				break;
+          i += shift;
         }
-      }
 
-      if(match === true) {
-      	break;
+        match = false;
+        break;
       }
+    }
+
+    if(match === true) {
+      break;
     }
   }
 
@@ -69,6 +67,25 @@ var addMultiplePatternTrie = function(parent, id, item) {
   node[item[0]] = {
     id: id
   }
+}
+
+var addMultiplePatternTable = function(table, trie) {
+
+}
+
+var containsMultiplePatterns = function(items, trie, table, data) {
+  var dataLength = data.length;
+
+  var i = 0;
+  var length = dataLength - itemLength + 1;
+
+  var match = false;
+
+  while(i < length) {
+    i++;
+  }
+
+  return match;
 }
 
 var lowercase = function(str) {
@@ -125,8 +142,18 @@ var Wade = function(data) {
       }
     } else {
       var trie = {};
+      var table = {};
       for(var i = 0; i < keywordsLength; i++) {
         addMultiplePatternTrie(trie, i, keywords[i]);
+      }
+      addMultiplePatternTable(table, trie);
+      for(var i = 0; i < dataLength; i++) {
+        if(containsMultiplePatterns(keywords[i], trie, table, data[i]) === true) {
+          results.push({
+            index: i,
+            score: 1
+          });
+        }
       }
     }
 
