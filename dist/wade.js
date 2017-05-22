@@ -69,7 +69,7 @@
       for(var i = 0; i < data.length; i++) {
         var str = data[i];
         for(var j = 0; j < str.length; j++) {
-          var item = item[j];
+          var item = str[j];
           var itemLength = item.length - 1;
           var node = tree;
           for(var n = 0; n < itemLength; n++) {
