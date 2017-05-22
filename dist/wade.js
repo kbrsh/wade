@@ -28,7 +28,7 @@
         }
       }
     
-      return words;
+      return words.join(" ");
     }
     
     var Wade = function(data) {
@@ -67,7 +67,7 @@
     Wade.index = function(data) {
       var tree = {};
       for(var i = 0; i < data.length; i++) {
-        var str = data[i];
+        var str = data[i].split(" ");
         for(var j = 0; j < str.length; j++) {
           var item = str[j];
           var itemLength = item.length - 1;
@@ -77,9 +77,20 @@
             var newNode = node[char];
             newNode = newNode === undefined ? {} : newNode;
             node[char] = newNode;
+            node = newNode;
           }
-          node[item[itemLength]] = {
-            id: i
+          var lastChar = item[itemLength];
+          if(node[lastChar] === undefined) {
+            node[lastChar] = {
+              id: [i]
+            }
+          } else {
+            node = node[lastChar];
+            if(node.id === undefined) {
+              node.id = [i];
+            } else {
+              node.id.push(i);
+            }
           }
         }
       }
