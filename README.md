@@ -43,6 +43,7 @@ Combined with libraries like [Moon](http://moonjs.ga), you can create a simple r
 Wade uses a pipeline to preprocess data and search queries. By default, this pipeline will:
 
 * Make everything lowercase
+* Remove punctuation
 * Remove stop words
 
 A pipeline consists of different functions that process a string and modify it in some way, and return the string.
