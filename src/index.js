@@ -67,6 +67,20 @@ var containsPrefix = function(pattern, index, results, resultsLocations, scoreIn
   }
 }
 
+var getWords = function(str) {
+  var lastIndex = str.length - 1;
+
+  if(str[0] === " ") {
+    str = str.substring(1);
+  }
+
+  if(str[lastIndex] === " ") {
+    str = str.substring(0, lastIndex);
+  }
+
+  return str.split(" ");
+}
+
 var lowercase = function(str) {
   return str.toLowerCase();
 }
@@ -76,7 +90,7 @@ var removePunctuation = function(str) {
 }
 
 var removeStopWords = function(str) {
-  var words = str.split(" ");
+  var words = getWords(str);
 
   for(var i = 0; i < words.length; i++) {
     if(stopWords.indexOf(words[i]) !== -1) {
@@ -90,7 +104,7 @@ var removeStopWords = function(str) {
 var Wade = function(data) {
   var search = function(item) {
     var index = search.index;
-    var keywords = Wade.process(item).split(" ");
+    var keywords = getWords(Wade.process(item));
     var keywordsLength = keywords.length;
     var fullwordsLength = keywordsLength - 1;
     var scoreIncrement = 1 / keywordsLength;
@@ -131,7 +145,7 @@ Wade.process = function(item) {
 Wade.index = function(data) {
   var index = {};
   for(var i = 0; i < data.length; i++) {
-    var str = data[i].split(" ");
+    var str = getWords(data[i]);
     for(var j = 0; j < str.length; j++) {
       var item = str[j];
       var itemLength = item.length - 1;
