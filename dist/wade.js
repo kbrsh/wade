@@ -11,6 +11,72 @@
     var stopWords = ['about', 'after', 'all', 'also', 'am', 'an', 'and', 'another', 'any', 'are', 'as', 'at', 'be', 'because', 'been', 'before', 'being', 'between', 'both', 'but', 'by', 'came', 'can', 'come', 'could', 'did', 'do', 'each', 'for', 'from', 'get', 'got', 'has', 'had', 'he', 'have', 'her', 'here', 'him', 'himself', 'his', 'how', 'if', 'in', 'into', 'is', 'it', 'like', 'make', 'many', 'me', 'might', 'more', 'most', 'much', 'must', 'my', 'never', 'now', 'of', 'on', 'only', 'or', 'other', 'our', 'out', 'over', 'said', 'same', 'see', 'should', 'since', 'some', 'still', 'such', 'take', 'than', 'that', 'the', 'their', 'them', 'then', 'there', 'these', 'they', 'this', 'those', 'through', 'to', 'too', 'under', 'up', 'very', 'was', 'way', 'we', 'well', 'were', 'what', 'where', 'which', 'while', 'who', 'with', 'would', 'you', 'your', 'a', 'i'];
     var punctuationRE = /\.|\,|\!/g;
     
+    var getRoot = function(pattern, index) {
+      var node = index;
+    
+      for(var i = 0; i < pattern.length; i++) {
+        var char = pattern[i];
+        node = node[char];
+        if(node === undefined) {
+          break;
+        }
+      }
+    
+      return node;
+    }
+    
+    var updateResults = function(id, results, resultsLocations, scoreIncrement) {
+      var location = null;
+    
+      for(var i = 0; i < id.length; i++) {
+        var documentID = id[i];
+        location = resultsLocations[documentID];
+    
+        if(location === undefined) {
+          resultsLocations[documentID] = results.length;
+          results.push({
+            index: documentID,
+            score: scoreIncrement
+          })
+        } else {
+          results[location].score += scoreIncrement;
+        }
+      }
+    }
+    
+    var contains = function(pattern, index, results, resultsLocations, scoreIncrement) {
+      var node = getRoot(pattern, index);
+    
+      if(node !== undefined && node.id !== undefined) {
+        updateResults(node.id, results, resultsLocations, scoreIncrement);
+      }
+    }
+    
+    var containsPrefix = function(pattern, index, results, resultsLocations, scoreIncrement) {
+      var node = getRoot(pattern, index);
+    
+      if(node !== undefined) {
+        var stack = [node];
+        var current = null;
+        var currentIndex = 0;
+    
+        while(stack.length !== 0) {
+          current = stack[currentIndex];
+          if(current.id !== undefined) {
+            updateResults(current.id, results, resultsLocations, scoreIncrement);
+          }
+    
+          stack.pop();
+          currentIndex--;
+    
+          for(var child in current) {
+            stack.push(current[child]);
+            currentIndex++;
+          }
+        }
+      }
+    }
+    
     var lowercase = function(str) {
       return str.toLowerCase();
     }
@@ -33,11 +99,19 @@
     
     var Wade = function(data) {
       var search = function(item) {
-        var data = search.data;
-        var dataLength = data.length;
+        var index = search.index;
         var keywords = Wade.process(item).split(" ");
         var keywordsLength = keywords.length;
+        var fullwordsLength = keywordsLength - 1;
+        var scoreIncrement = 1 / keywordsLength;
         var results = [];
+        var resultsLocations = {};
+    
+        for(var i = 0; i < fullwordsLength; i++) {
+          contains(keywords[i], index, results, resultsLocations, scoreIncrement);
+        }
+    
+        containsPrefix(keywords[fullwordsLength], index, results, resultsLocations, scoreIncrement);
     
         return results;
       }
@@ -65,13 +139,14 @@
     }
     
     Wade.index = function(data) {
-      var tree = {};
+      var index = {};
       for(var i = 0; i < data.length; i++) {
         var str = data[i].split(" ");
         for(var j = 0; j < str.length; j++) {
           var item = str[j];
           var itemLength = item.length - 1;
-          var node = tree;
+          var node = index;
+    
           for(var n = 0; n < itemLength; n++) {
             var char = item[n];
             var newNode = node[char];
@@ -79,6 +154,7 @@
             node[char] = newNode;
             node = newNode;
           }
+    
           var lastChar = item[itemLength];
           if(node[lastChar] === undefined) {
             node[lastChar] = {
@@ -94,7 +170,7 @@
           }
         }
       }
-      return tree;
+      return index;
     }
     
     Wade.version = "0.2.0";
