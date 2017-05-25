@@ -40,7 +40,20 @@ Combined with libraries like [Moon](http://moonjs.ga), you can create a simple r
 
 ### Loading/Saving Data
 
+To save data as an object, use `Wade.save` on your search function, and then use these later when initializing Wade.
 
+For example:
+
+```js
+// Create the initial search function
+const search = Wade(["Apple", "Orange", "Lemon", "Tomato"]);
+const instance = Wade.save(search);
+
+// Save `instance` somewhere...
+
+// When initializing, provide the data from `Wade.save`
+const search = Wade(instance);
+```
 
 ### Pipeline
 
