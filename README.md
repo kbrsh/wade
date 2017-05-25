@@ -38,6 +38,10 @@ search("App");
 
 Combined with libraries like [Moon](http://moonjs.ga), you can create a simple real-time search.
 
+### Loading/Saving Data
+
+
+
 ### Pipeline
 
 Wade uses a pipeline to preprocess data and search queries. By default, this pipeline will:

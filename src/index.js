@@ -120,12 +120,17 @@ var Wade = function(data) {
     return results;
   }
 
-  for(var i = 0; i < data.length; i++) {
-    data[i] = Wade.process(data[i]);
-  }
+  if(Array.isArray(data)) {
+    for(var i = 0; i < data.length; i++) {
+      data[i] = Wade.process(data[i]);
+    }
 
-  search.index = Wade.index(data);
-  search.data = data;
+    search.index = Wade.index(data);
+    search.data = data;
+  } else {
+    search.index = data.index;
+    search.data = data.data;
+  }
 
   return search;
 }
@@ -175,6 +180,13 @@ Wade.index = function(data) {
     }
   }
   return index;
+}
+
+Wade.save = function(search) {
+  return {
+    data: search.data,
+    index: search.index
+  }
 }
 
 Wade.version = "__VERSION__";
