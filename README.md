@@ -50,8 +50,12 @@ const search = Wade(["Apple", "Orange", "Lemon", "Tomato"]);
 const instance = Wade.save(search);
 
 // Save `instance` somewhere...
+```
 
-// When initializing, provide the data from `Wade.save`
+Later, you can get the same search function without having Wade recreate an index every time by doing:
+
+```js
+// Retrieve `instance`, then
 const search = Wade(instance);
 ```
 
