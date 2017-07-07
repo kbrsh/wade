@@ -4,7 +4,8 @@
   "description": "Blazing fast, 1kb search library",
   "main": "dist/wade.min.js",
   "scripts": {
-    "build": "gulp"
+    "build": "gulp",
+    "test": "gulp test"
   },
   "repository": {
     "type": "git",
@@ -23,10 +24,12 @@
   },
   "homepage": "https://github.com/KingPixil/wade#readme",
   "devDependencies": {
+    "chai": "^4.0.2",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-header": "^1.8.8",
     "gulp-include": "^2.3.1",
+    "gulp-mocha": "^4.3.1",
     "gulp-replace": "^0.5.4",
     "gulp-size": "^2.1.0",
     "gulp-uglify": "^3.0.0"

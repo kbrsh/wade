@@ -8,6 +8,7 @@ var include = require("gulp-include");
 var concat = require("gulp-concat");
 var header = require("gulp-header");
 var size = require("gulp-size");
+var mocha = require("gulp-mocha");
 
 var comment = `/**
  * Wade v${pkg.version}
@@ -35,6 +36,11 @@ gulp.task('minify', ['build'], function() {
     }))
     .pipe(concat('wade.min.js'))
     .pipe(gulp.dest('./dist/'));
+});
+
+gulp.task("test", function() {
+  gulp.src('./test/**/*.js')
+  		.pipe(mocha({reporter: 'spec'}))
 });
 
 // Default task
