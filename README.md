@@ -2,6 +2,8 @@
 
 Blazing fast, 1kb search
 
+[![Build Status](https://travis-ci.org/KingPixil/wade.svg?branch=master)](https://travis-ci.org/KingPixil/wade)
+
 ### Installation
 
 NPM
