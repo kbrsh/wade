@@ -27,7 +27,7 @@ var updateResults = function(id, results, resultsLocations, scoreIncrement) {
       results.push({
         index: documentID,
         score: scoreIncrement
-      })
+      });
     } else {
       results[location].score += scoreIncrement;
     }

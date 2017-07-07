@@ -37,7 +37,7 @@
           results.push({
             index: documentID,
             score: scoreIncrement
-          })
+          });
         } else {
           results[location].score += scoreIncrement;
         }
