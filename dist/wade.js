@@ -114,29 +114,41 @@
     var Wade = function(data) {
       var search = function(item) {
         var index = search.index;
-        var keywords = getWords(Wade.process(item));
+        var processed = Wade.process(item);
+    
+        if(processed === false) {
+          return [];
+        }
+    
+        var keywords = getWords(processed);
         var keywordsLength = keywords.length;
-        var fullwordsLength = keywordsLength - 1;
+        var fullWordsLength = keywordsLength - 1;
         var scoreIncrement = 1 / keywordsLength;
         var results = [];
         var resultsLocations = {};
     
-        for(var i = 0; i < fullwordsLength; i++) {
+        for(var i = 0; i < fullWordsLength; i++) {
           contains(keywords[i], index, results, resultsLocations, scoreIncrement);
         }
     
-        containsPrefix(keywords[fullwordsLength], index, results, resultsLocations, scoreIncrement);
+        containsPrefix(keywords[fullWordsLength], index, results, resultsLocations, scoreIncrement);
     
         return results;
       }
     
       if(Array.isArray(data)) {
+        var normalizedData = [];
+        var item = null;
+    
         for(var i = 0; i < data.length; i++) {
-          data[i] = Wade.process(data[i]);
+          item = Wade.process(data[i]);
+          if(item !== false) {
+            normalizedData.push(item);
+          }
         }
     
-        search.index = Wade.index(data);
-        search.data = data;
+        search.index = Wade.index(normalizedData);
+        search.data = normalizedData;
       } else {
         search.index = data.index;
         search.data = data.data;
@@ -154,7 +166,11 @@
         item = pipeline[j](item);
       }
     
-      return item;
+      if(item.length === 0) {
+        return false;
+      } else {
+        return item;
+      }
     }
     
     Wade.index = function(data) {
