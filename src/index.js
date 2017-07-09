@@ -106,12 +106,12 @@ var Wade = function(data) {
     var index = search.index;
     var keywords = getWords(Wade.process(item));
     var keywordsLength = keywords.length;
-    var fullwordsLength = keywordsLength - 1;
+    var fullWordsLength = keywordsLength - 1;
     var scoreIncrement = 1 / keywordsLength;
     var results = [];
     var resultsLocations = {};
 
-    for(var i = 0; i < fullwordsLength; i++) {
+    for(var i = 0; i < fullWordsLength; i++) {
       contains(keywords[i], index, results, resultsLocations, scoreIncrement);
     }
 
