@@ -1,5 +1,5 @@
 /**
- * Wade v0.3.0
+ * Wade v0.3.1
  * Copyright 2017 Kabir Shah
  * Released under the MIT License
  */
@@ -215,7 +215,7 @@
       }
     }
     
-    Wade.version = "0.3.0";
+    Wade.version = "0.3.1";
     
     return Wade;
 }));

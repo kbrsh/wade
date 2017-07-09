@@ -1,6 +1,6 @@
 {
   "name": "wade",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Blazing fast, 1kb search library",
   "main": "dist/wade.min.js",
   "scripts": {
