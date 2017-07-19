@@ -1,5 +1,9 @@
 var stopWords = ['about', 'after', 'all', 'also', 'am', 'an', 'and', 'another', 'any', 'are', 'as', 'at', 'be', 'because', 'been', 'before', 'being', 'between', 'both', 'but', 'by', 'came', 'can', 'come', 'could', 'did', 'do', 'each', 'for', 'from', 'get', 'got', 'has', 'had', 'he', 'have', 'her', 'here', 'him', 'himself', 'his', 'how', 'if', 'in', 'into', 'is', 'it', 'like', 'make', 'many', 'me', 'might', 'more', 'most', 'much', 'must', 'my', 'never', 'now', 'of', 'on', 'only', 'or', 'other', 'our', 'out', 'over', 'said', 'same', 'see', 'should', 'since', 'some', 'still', 'such', 'take', 'than', 'that', 'the', 'their', 'them', 'then', 'there', 'these', 'they', 'this', 'those', 'through', 'to', 'too', 'under', 'up', 'very', 'was', 'way', 'we', 'well', 'were', 'what', 'where', 'which', 'while', 'who', 'with', 'would', 'you', 'your', 'a', 'i'];
 var punctuationRE = /[.,!?:;"']/g;
+var config = {
+  stopWords: stopWords,
+  punctuationRE: punctuationRE
+};
 
 var getRoot = function(pattern, index) {
   var node = index;
@@ -86,7 +90,7 @@ var lowercase = function(str) {
 }
 
 var removePunctuation = function(str) {
-  return str.replace(Wade.config.punctuationRE, "");
+  return str.replace(config.punctuationRE, "");
 }
 
 var removeStopWords = function(str) {
@@ -206,9 +210,6 @@ Wade.save = function(search) {
   }
 }
 
-Wade.config = {
-  stopWords: stopWords,
-  punctuationRE: punctuationRE,
-};
+Wade.config = config;
 
 Wade.version = "__VERSION__";
