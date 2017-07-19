@@ -1,5 +1,5 @@
 /**
- * Wade v0.3.1
+ * Wade v0.3.2
  * Copyright 2017 Kabir Shah
  * Released under the MIT License
  */
@@ -222,7 +222,7 @@
     
     Wade.config = config;
     
-    Wade.version = "0.3.1";
+    Wade.version = "0.3.2";
     
     return Wade;
 }));
