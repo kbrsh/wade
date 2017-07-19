@@ -91,6 +91,12 @@ The stop words can be configured to include any words you like, and you can acce
 Wade.config.stopWords = [/* array of stop words */];
 ```
 
+The punctuation regular expression used to remove punctuation can be configured with:
+
+```js
+Wade.config.punctuationRE = /[.!]/g; // should contain punctuation to remove
+```
+
 ### Algorithm
 
 The algorithm behind the search is fairly simple. First, a trie data structure is generated off of the data. When performing a search, the following happens:
