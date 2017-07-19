@@ -6,6 +6,6 @@ describe("Processing", function() {
     const data = Wade(["ALL UPPERCASE!!", "This. is wade"]).data;
 
     expect(data[0]).to.equal('uppercase');
-    expect(data[1]).to.equal('is wade');
+    expect(data[1]).to.equal('wade');
   });
 });

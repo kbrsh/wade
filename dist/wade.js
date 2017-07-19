@@ -101,8 +101,9 @@
     
     var removeStopWords = function(str) {
       var words = getWords(str);
+      var i = words.length;
     
-      for(var i = 0; i < words.length; i++) {
+      while((i--) !== 0) {
         if(stopWords.indexOf(words[i]) !== -1) {
           words.splice(i, 1);
         }
@@ -214,6 +215,10 @@
         index: search.index
       }
     }
+    
+    Wade.config = {
+      stopWords: stopWords
+    };
     
     Wade.version = "0.3.1";
     

@@ -91,8 +91,9 @@ var removePunctuation = function(str) {
 
 var removeStopWords = function(str) {
   var words = getWords(str);
+  var i = words.length;
 
-  for(var i = 0; i < words.length; i++) {
+  while((i--) !== 0) {
     if(stopWords.indexOf(words[i]) !== -1) {
       words.splice(i, 1);
     }
