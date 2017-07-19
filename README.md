@@ -85,6 +85,12 @@ Wade.pipeline.push(function(str) {
 
 All functions will be executed in the order of the pipeline (0-n) and they will be used on each document in the data.
 
+The stop words can be configured to include any words you like, and you can access the array of stop words by using:
+
+```js
+Wade.config.stopWords = [/* array of stop words */];
+```
+
 ### Algorithm
 
 The algorithm behind the search is fairly simple. First, a trie data structure is generated off of the data. When performing a search, the following happens:
