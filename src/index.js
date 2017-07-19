@@ -205,4 +205,8 @@ Wade.save = function(search) {
   }
 }
 
+Wade.config = {
+  stopWords: stopWords
+};
+
 Wade.version = "__VERSION__";
