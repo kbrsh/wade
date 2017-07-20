@@ -95,15 +95,10 @@ var removePunctuation = function(str) {
 
 var removeStopWords = function(str) {
   var words = getWords(str);
-  var i = words.length;
 
-  while((i--) !== 0) {
-    if(Wade.config.stopWords.indexOf(words[i]) !== -1) {
-      words.splice(i, 1);
-    }
-  }
-
-  return words.join(" ");
+  return words.filter(function(word) {
+    return Wade.config.stopWords.indexOf(word]) !== -1;
+  }).join(" ");
 }
 
 var Wade = function(data) {
