@@ -133,10 +133,10 @@ var Wade = function(data) {
 
   if(Array.isArray(data)) {
     var item = null;
-    var dataLen, normalized = 0;
-    var normalizedData = new Array(dataLen);
+    var dataLen = data.length;
+    var normalizedData = new Array();
 
-    for(var i = 0, dataLen = data.length; i < dataLen; i++) {
+    for(var i = 0; i < dataLen; i++) {
       item = Wade.process(data[i]);
       normalizedData[i] = item || undefined;
     }
