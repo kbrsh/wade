@@ -128,25 +128,36 @@ var Wade = function(data) {
 
     containsPrefix(keywords[fullWordsLength], index, results, resultsLocations, scoreIncrement);
 
+    if (results.length && search.indexMap) {
+      results.forEach(function(r) {
+        r.index = search.indexMap[r.index];
+      });
+    }
+
     return results;
   }
 
   if(Array.isArray(data)) {
     var normalizedData = [];
     var item = null;
+    var indexMap = [];
+    var dataLen, normalized = 0;
 
-    for(var i = 0; i < data.length; i++) {
+    for(var i = 0, dataLen = data.length; i < dataLen; i++) {
       item = Wade.process(data[i]);
       if(item !== false) {
         normalizedData.push(item);
+        indexMap[normalized++] = i;
       }
     }
 
     search.index = Wade.index(normalizedData);
     search.data = normalizedData;
+    if (dataLen !== normalized) search.indexMap = indexMap;
   } else {
     search.index = data.index;
     search.data = data.data;
+    search.indexMap = data.indexMap;
   }
 
   return search;
