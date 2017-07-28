@@ -134,7 +134,7 @@ var Wade = function(data) {
   if(Array.isArray(data)) {
     var item = null;
     var dataLen = data.length;
-    var normalizedData = new Array();
+    var normalizedData = new Array(dataLen);
 
     for(var i = 0; i < dataLen; i++) {
       item = Wade.process(data[i]);
