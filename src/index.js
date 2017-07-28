@@ -132,14 +132,13 @@ var Wade = function(data) {
   }
 
   if(Array.isArray(data)) {
-    var normalizedData = [];
     var item = null;
+    var dataLen = data.length;
+    var normalizedData = new Array(dataLen);
 
-    for(var i = 0; i < data.length; i++) {
+    for(var i = 0; i < dataLen; i++) {
       item = Wade.process(data[i]);
-      if(item !== false) {
-        normalizedData.push(item);
-      }
+      normalizedData[i] = item || undefined;
     }
 
     search.index = Wade.index(normalizedData);
@@ -171,6 +170,7 @@ Wade.process = function(item) {
 Wade.index = function(data) {
   var index = {};
   for(var i = 0; i < data.length; i++) {
+    if (!data[i]) continue;
     var str = getWords(data[i]);
     for(var j = 0; j < str.length; j++) {
       var item = str[j];
