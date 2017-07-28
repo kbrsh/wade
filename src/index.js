@@ -133,7 +133,6 @@ var Wade = function(data) {
 
   if(Array.isArray(data)) {
     var item = null;
-    var indexMap = [];
     var dataLen, normalized = 0;
     var normalizedData = new Array(dataLen);
 
