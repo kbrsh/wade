@@ -2,7 +2,7 @@
 
 Blazing fast, 1kb search
 
-[![Build Status](https://travis-ci.org/KingPixil/wade.svg?branch=master)](https://travis-ci.org/KingPixil/wade)
+[![Build Status](https://travis-ci.org/kbrsh/wade.svg?branch=master)](https://travis-ci.org/kbrsh/wade)
 
 ### Installation
 
@@ -108,4 +108,4 @@ The algorithm behind the search is fairly simple. First, a trie data structure i
 
 ### License
 
-Licensed under the [MIT License](https://kingpixil.github.io/license) by [Kabir Shah](https://kabir.ml)
+Licensed under the [MIT License](https://kbrsh.github.io/license) by [Kabir Shah](https://kabir.ml)

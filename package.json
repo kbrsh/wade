@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/KingPixil/wade.git"
+    "url": "git+https://github.com/kbrsh/wade.git"
   },
   "keywords": [
     "search",
@@ -20,9 +20,9 @@
   "author": "Kabir Shah",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/KingPixil/wade/issues"
+    "url": "https://github.com/kbrsh/wade/issues"
   },
-  "homepage": "https://github.com/KingPixil/wade#readme",
+  "homepage": "https://github.com/kbrsh/wade#readme",
   "devDependencies": {
     "chai": "^4.0.2",
     "gulp": "^3.9.1",
