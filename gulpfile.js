@@ -14,6 +14,7 @@ var comment = `/**
  * Wade v${pkg.version}
  * Copyright 2017 Kabir Shah
  * Released under the MIT License
+ * https://github.com/kbrsh/wade
  */\r\n`;
 
 gulp.task('build', function () {

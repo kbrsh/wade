@@ -2,6 +2,7 @@
  * Wade v0.3.3
  * Copyright 2017 Kabir Shah
  * Released under the MIT License
+ * https://github.com/kbrsh/wade
  */
 
 (function(root, factory) {
