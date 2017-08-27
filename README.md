@@ -38,7 +38,7 @@ search("App");
 */
 ```
 
-Combined with libraries like [Moon](http://moonjs.ga), you can create a simple [real-time search](http://moonjs.ga/examples/search/)
+Combined with libraries like [Moon](http://moonjs.ga), you can create a simple [real-time search](http://moonjs.ga/examples/search/index.html)
 
 ### Loading/Saving Data
 
