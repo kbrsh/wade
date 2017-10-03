@@ -1,6 +1,10 @@
 (function(root, factory) {
   /* ======= Global Wade ======= */
-  (typeof module === "object" && module.exports) ? module.exports = factory() : root.Wade = factory();
+  if(typeof module === "undefined") {
+    root.Wade = factory();
+  } else {
+    module.exports = factory();
+  }
 }(this, function() {
     //=require ./index.js
     return Wade;
