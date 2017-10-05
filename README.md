@@ -1,6 +1,6 @@
 # Wade
 
-Blazing fast, 1kb search
+Blazing fast 1kb search
 
 [![Build Status](https://travis-ci.org/kbrsh/wade.svg?branch=master)](https://travis-ci.org/kbrsh/wade)
 
