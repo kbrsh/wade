@@ -51,7 +51,7 @@ For example:
 const search = Wade(["Apple", "Orange", "Lemon", "Tomato"]);
 const instance = Wade.save(search);
 
-// Save `instance` somewhere...
+// Save `instance`
 ```
 
 Later, you can get the same search function without having Wade recreate an index every time by doing:
