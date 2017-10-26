@@ -60,9 +60,9 @@ const removeStopWords = function(str) {
 }
 
 const Wade = function(data) {
-  const search = function(item) {
+  const search = function(query) {
     const index = search.index;
-    const terms = getTerms(item);
+    const terms = getTerms(query);
     const termsLength = terms.length;
     const exactTermsLength = termsLength - 1;
     const increment = 1 / termsLength;
@@ -120,13 +120,12 @@ const Wade = function(data) {
   }
 
   if(Array.isArray(data) === true) {
-    const dataLength = data.length;
     let normalizedData = [];
 
-    for(let i = 0; i < dataLength; i++) {
-      const item = Wade.process(data[i]);
-      if(item.length !== 0) {
-        normalizedData.push(item);
+    for(let i = 0; i < data.length; i++) {
+      const processedEntry = Wade.process(data[i]);
+      if(processedEntry.length !== 0) {
+        normalizedData.push(processedEntry);
       }
     }
 
@@ -142,14 +141,14 @@ const Wade = function(data) {
 
 Wade.pipeline = [lowercase, removePunctuation, removeStopWords];
 
-Wade.process = function(item) {
+Wade.process = function(entry) {
   const pipeline = Wade.pipeline;
 
   for(let i = 0; i < pipeline.length; i++) {
-    item = pipeline[i](item);
+    entry = pipeline[i](entry);
   }
 
-  return item;
+  return entry;
 }
 
 Wade.index = function(data) {

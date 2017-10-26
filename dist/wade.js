@@ -75,9 +75,9 @@
     }
     
     var Wade = function(data) {
-      var search = function(item) {
+      var search = function(query) {
         var index = search.index;
-        var terms = getTerms(item);
+        var terms = getTerms(query);
         var termsLength = terms.length;
         var exactTermsLength = termsLength - 1;
         var increment = 1 / termsLength;
@@ -135,13 +135,12 @@
       }
     
       if(Array.isArray(data) === true) {
-        var dataLength = data.length;
         var normalizedData = [];
     
-        for(var i = 0; i < dataLength; i++) {
-          var item = Wade.process(data[i]);
-          if(item.length !== 0) {
-            normalizedData.push(item);
+        for(var i = 0; i < data.length; i++) {
+          var processedEntry = Wade.process(data[i]);
+          if(processedEntry.length !== 0) {
+            normalizedData.push(processedEntry);
           }
         }
     
@@ -157,14 +156,14 @@
     
     Wade.pipeline = [lowercase, removePunctuation, removeStopWords];
     
-    Wade.process = function(item) {
+    Wade.process = function(entry) {
       var pipeline = Wade.pipeline;
     
       for(var i = 0; i < pipeline.length; i++) {
-        item = pipeline[i](item);
+        entry = pipeline[i](entry);
       }
     
-      return item;
+      return entry;
     }
     
     Wade.index = function(data) {
