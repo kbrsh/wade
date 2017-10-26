@@ -20,13 +20,13 @@ CDN
 
 ### Usage
 
-Initialize with strings in the form of an array
+Initialize Wade with an array of strings.
 
 ```js
 const search = Wade(["Apple", "Orange", "Lemon", "Tomato"]);
 ```
 
-Now you can search for a substring within the array, and Wade will return the index of it.
+Now you can search for a query within the array, and Wade will return the index of it, along with a score.
 
 ```js
 search("App");
