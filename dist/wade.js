@@ -205,7 +205,7 @@
             node = node[lastChar];
             var nodeData = node.data;
     
-            if(data === undefined) {
+            if(nodeData === undefined) {
               node.data = [1, i];
               nodes.push(node);
             } else {

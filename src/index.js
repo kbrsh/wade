@@ -190,7 +190,7 @@ Wade.index = function(data) {
         node = node[lastChar];
         const nodeData = node.data;
 
-        if(data === undefined) {
+        if(nodeData === undefined) {
           node.data = [1, i];
           nodes.push(node);
         } else {
