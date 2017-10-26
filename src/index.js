@@ -119,7 +119,6 @@ const Wade = function(data) {
           }
         }
 
-
         return results;
       }
     }
