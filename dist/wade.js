@@ -77,60 +77,66 @@
     var Wade = function(data) {
       var search = function(query) {
         var index = search.index;
-        var terms = getTerms(query);
-        var termsLength = terms.length;
-        var exactTermsLength = termsLength - 1;
-        var increment = 1 / termsLength;
+        var processed = Wade.process(query);
         var results = [];
         var resultIndexes = {};
     
-        if(termsLength === 0) {
+        if(processed.length === 0) {
           return results;
         } else {
-          exactOuter: for(var i = 0; i < exactTermsLength; i++) {
-            var term = terms[i];
-            var node = index;
+          var terms = getTerms(processed);
+          var termsLength = terms.length;
+          var exactTermsLength = termsLength - 1;
+          var increment = 1 / termsLength;
     
-            for(var j = 0; j < term.length; j++) {
-              node = node[term[j]];
-              if(node === undefined) {
-                continue exactOuter;
+          if(termsLength === 0) {
+            return results;
+          } else {
+            exactOuter: for(var i = 0; i < exactTermsLength; i++) {
+              var term = terms[i];
+              var node = index;
+    
+              for(var j = 0; j < term.length; j++) {
+                node = node[term[j]];
+                if(node === undefined) {
+                  continue exactOuter;
+                }
+              }
+    
+              var nodeData = node.data;
+              if(nodeData !== undefined) {
+                update(results, resultIndexes, increment, nodeData);
               }
             }
     
-            var nodeData = node.data;
-            if(nodeData !== undefined) {
-              update(results, resultIndexes, increment, nodeData);
+            var lastTerm = terms[exactTermsLength];
+            var node$1 = index;
+    
+            for(var i$1 = 0; i$1 < lastTerm.length; i$1++) {
+              var existingNode = node$1[lastTerm[i$1]];
+              if(existingNode === undefined) {
+                break;
+              } else {
+                node$1 = existingNode;
+              }
             }
+    
+            var nodeStack = [node$1];
+            var childNode;
+            while((childNode = nodeStack.pop())) {
+              var childNodeData = childNode.data;
+              if(childNodeData !== undefined) {
+                update(results, resultIndexes, increment, childNodeData);
+              }
+    
+              for(var char in childNode) {
+                nodeStack.push(childNode[char]);
+              }
+            }
+    
+    
+            return results;
           }
-    
-          var lastTerm = terms[exactTermsLength];
-          var node$1 = index;
-    
-          for(var i$1 = 0; i$1 < lastTerm.length; i$1++) {
-            var existingNode = node$1[lastTerm[i$1]];
-            if(existingNode === undefined) {
-              break;
-            } else {
-              node$1 = existingNode;
-            }
-          }
-    
-          var nodeStack = [node$1];
-          var childNode;
-          while((childNode = nodeStack.pop())) {
-            var childNodeData = childNode.data;
-            if(childNodeData !== undefined) {
-              update(results, resultIndexes, increment, childNodeData);
-            }
-    
-            for(var char in childNode) {
-              nodeStack.push(childNode[char]);
-            }
-          }
-    
-    
-          return results;
         }
       }
     
