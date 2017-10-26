@@ -45,15 +45,11 @@
         terms.shift();
       }
     
-      if(terms.length === 0) {
-        return terms;
-      } else {
-        if(terms[terms.length - 1].length === 0) {
-          terms.pop();
-        }
-    
-        return terms;
+      if(terms[terms.length - 1].length === 0) {
+        terms.pop();
       }
+    
+      return terms;
     }
     
     var lowercase = function(str) {
@@ -145,20 +141,9 @@
       }
     
       if(Array.isArray(data) === true) {
-        var normalizedData = [];
-    
-        for(var i = 0; i < data.length; i++) {
-          var processedEntry = Wade.process(data[i]);
-          if(processedEntry.length !== 0) {
-            normalizedData.push(processedEntry);
-          }
-        }
-    
-        search.index = Wade.index(normalizedData);
-        search.data = normalizedData;
+        search.index = Wade.index(data);
       } else {
-        search.index = data.index;
-        search.data = data.data;
+        search.index = data;
       }
     
       return search;
@@ -167,13 +152,17 @@
     Wade.pipeline = [lowercase, removePunctuation, removeStopWords];
     
     Wade.process = function(entry) {
-      var pipeline = Wade.pipeline;
+      if(entry.length === 0) {
+        return entry;
+      } else {
+        var pipeline = Wade.pipeline;
     
-      for(var i = 0; i < pipeline.length; i++) {
-        entry = pipeline[i](entry);
+        for(var i = 0; i < pipeline.length; i++) {
+          entry = pipeline[i](entry);
+        }
+    
+        return entry;
       }
-    
-      return entry;
     }
     
     Wade.index = function(data) {
@@ -183,42 +172,45 @@
       var nodes = [];
     
       for(var i = 0; i < dataLength; i++) {
-        var terms = getTerms(data[i]);
-        var termsLength = terms.length;
+        var entry = Wade.process(data[i]);
+        if(entry.length !== 0) {
+          var terms = getTerms(entry);
+          var termsLength = terms.length;
     
-        termsLengths.push(termsLength);
+          termsLengths.push(termsLength);
     
-        for(var j = 0; j < termsLength; j++) {
-          var term = terms[j];
-          var termLength = term.length - 1;
-          var node = index;
+          for(var j = 0; j < termsLength; j++) {
+            var term = terms[j];
+            var termLength = term.length - 1;
+            var node = index;
     
-          for(var n = 0; n < termLength; n++) {
-            var char = term[n];
-            var existingNode = node[char];
+            for(var n = 0; n < termLength; n++) {
+              var char = term[n];
+              var existingNode = node[char];
     
-            if(existingNode === undefined) {
-              existingNode = node[char] = {};
+              if(existingNode === undefined) {
+                existingNode = node[char] = {};
+              }
+    
+              node = existingNode;
             }
     
-            node = existingNode;
-          }
-    
-          var lastChar = term[termLength];
-          if(node[lastChar] === undefined) {
-            node = node[lastChar] = {
-              data: [1, i]
-            };
-            nodes.push(node);
-          } else {
-            node = node[lastChar];
-            var nodeData = node.data;
-    
-            if(nodeData === undefined) {
-              node.data = [1, i];
+            var lastChar = term[termLength];
+            if(node[lastChar] === undefined) {
+              node = node[lastChar] = {
+                data: [1, i]
+              };
               nodes.push(node);
             } else {
-              nodeData.push(i);
+              node = node[lastChar];
+              var nodeData = node.data;
+    
+              if(nodeData === undefined) {
+                node.data = [1, i];
+                nodes.push(node);
+              } else {
+                nodeData.push(i);
+              }
             }
           }
         }
@@ -247,10 +239,7 @@
     }
     
     Wade.save = function(search) {
-      return {
-        data: search.data,
-        index: search.index
-      }
+      return search.index;
     }
     
     Wade.config = config;

@@ -3,9 +3,8 @@ const expect = require("chai").expect;
 
 describe("Processing", function() {
   it("should process data", function() {
-    const data = Wade(["ALL UPPERCASE!!", "This. is wade"]).data;
-
-    expect(data[0]).to.equal('uppercase');
-    expect(data[1]).to.equal('wade');
+    expect(Wade.process("ALL UPPERCASE!!")).to.equal("uppercase");
+    expect(Wade.process("This. is wade")).to.equal("wade");
+    expect(Wade.process("")).to.equal("");
   });
 });

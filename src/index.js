@@ -30,15 +30,11 @@ const getTerms = function(str) {
     terms.shift();
   }
 
-  if(terms.length === 0) {
-    return terms;
-  } else {
-    if(terms[terms.length - 1].length === 0) {
-      terms.pop();
-    }
-
-    return terms;
+  if(terms[terms.length - 1].length === 0) {
+    terms.pop();
   }
+
+  return terms;
 }
 
 const lowercase = function(str) {
@@ -130,20 +126,9 @@ const Wade = function(data) {
   }
 
   if(Array.isArray(data) === true) {
-    let normalizedData = [];
-
-    for(let i = 0; i < data.length; i++) {
-      const processedEntry = Wade.process(data[i]);
-      if(processedEntry.length !== 0) {
-        normalizedData.push(processedEntry);
-      }
-    }
-
-    search.index = Wade.index(normalizedData);
-    search.data = normalizedData;
+    search.index = Wade.index(data);
   } else {
-    search.index = data.index;
-    search.data = data.data;
+    search.index = data;
   }
 
   return search;
@@ -152,13 +137,17 @@ const Wade = function(data) {
 Wade.pipeline = [lowercase, removePunctuation, removeStopWords];
 
 Wade.process = function(entry) {
-  const pipeline = Wade.pipeline;
+  if(entry.length === 0) {
+    return entry;
+  } else {
+    const pipeline = Wade.pipeline;
 
-  for(let i = 0; i < pipeline.length; i++) {
-    entry = pipeline[i](entry);
+    for(let i = 0; i < pipeline.length; i++) {
+      entry = pipeline[i](entry);
+    }
+
+    return entry;
   }
-
-  return entry;
 }
 
 Wade.index = function(data) {
@@ -168,42 +157,45 @@ Wade.index = function(data) {
   let nodes = [];
 
   for(let i = 0; i < dataLength; i++) {
-    const terms = getTerms(data[i]);
-    const termsLength = terms.length;
+    const entry = Wade.process(data[i]);
+    if(entry.length !== 0) {
+      const terms = getTerms(entry);
+      const termsLength = terms.length;
 
-    termsLengths.push(termsLength);
+      termsLengths.push(termsLength);
 
-    for(let j = 0; j < termsLength; j++) {
-      const term = terms[j];
-      const termLength = term.length - 1;
-      let node = index;
+      for(let j = 0; j < termsLength; j++) {
+        const term = terms[j];
+        const termLength = term.length - 1;
+        let node = index;
 
-      for(let n = 0; n < termLength; n++) {
-        const char = term[n];
-        let existingNode = node[char];
+        for(let n = 0; n < termLength; n++) {
+          const char = term[n];
+          let existingNode = node[char];
 
-        if(existingNode === undefined) {
-          existingNode = node[char] = {};
+          if(existingNode === undefined) {
+            existingNode = node[char] = {};
+          }
+
+          node = existingNode;
         }
 
-        node = existingNode;
-      }
-
-      const lastChar = term[termLength];
-      if(node[lastChar] === undefined) {
-        node = node[lastChar] = {
-          data: [1, i]
-        };
-        nodes.push(node);
-      } else {
-        node = node[lastChar];
-        const nodeData = node.data;
-
-        if(nodeData === undefined) {
-          node.data = [1, i];
+        const lastChar = term[termLength];
+        if(node[lastChar] === undefined) {
+          node = node[lastChar] = {
+            data: [1, i]
+          };
           nodes.push(node);
         } else {
-          nodeData.push(i);
+          node = node[lastChar];
+          const nodeData = node.data;
+
+          if(nodeData === undefined) {
+            node.data = [1, i];
+            nodes.push(node);
+          } else {
+            nodeData.push(i);
+          }
         }
       }
     }
@@ -232,10 +224,7 @@ Wade.index = function(data) {
 }
 
 Wade.save = function(search) {
-  return {
-    data: search.data,
-    index: search.index
-  }
+  return search.index;
 }
 
 Wade.config = config;
