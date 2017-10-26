@@ -30,11 +30,15 @@ const getTerms = function(str) {
     terms.shift();
   }
 
-  if(terms[terms.length - 1].length === 0) {
-    terms.pop();
-  }
+  if(terms.length === 0) {
+    return terms;
+  } else {
+    if(terms[terms.length - 1].length === 0) {
+      terms.pop();
+    }
 
-  return terms;
+    return terms;
+  }
 }
 
 const lowercase = function(str) {
