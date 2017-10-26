@@ -62,60 +62,66 @@ const removeStopWords = function(str) {
 const Wade = function(data) {
   const search = function(query) {
     const index = search.index;
-    const terms = getTerms(query);
-    const termsLength = terms.length;
-    const exactTermsLength = termsLength - 1;
-    const increment = 1 / termsLength;
+    const processed = Wade.process(query);
     let results = [];
     let resultIndexes = {};
 
-    if(termsLength === 0) {
+    if(processed.length === 0) {
       return results;
     } else {
-      exactOuter: for(let i = 0; i < exactTermsLength; i++) {
-        const term = terms[i];
-        let node = index;
+      const terms = getTerms(processed);
+      const termsLength = terms.length;
+      const exactTermsLength = termsLength - 1;
+      const increment = 1 / termsLength;
 
-        for(let j = 0; j < term.length; j++) {
-          node = node[term[j]];
-          if(node === undefined) {
-            continue exactOuter;
+      if(termsLength === 0) {
+        return results;
+      } else {
+        exactOuter: for(let i = 0; i < exactTermsLength; i++) {
+          const term = terms[i];
+          let node = index;
+
+          for(let j = 0; j < term.length; j++) {
+            node = node[term[j]];
+            if(node === undefined) {
+              continue exactOuter;
+            }
+          }
+
+          const nodeData = node.data;
+          if(nodeData !== undefined) {
+            update(results, resultIndexes, increment, nodeData);
           }
         }
 
-        const nodeData = node.data;
-        if(nodeData !== undefined) {
-          update(results, resultIndexes, increment, nodeData);
+        const lastTerm = terms[exactTermsLength];
+        let node = index;
+
+        for(let i = 0; i < lastTerm.length; i++) {
+          const existingNode = node[lastTerm[i]];
+          if(existingNode === undefined) {
+            break;
+          } else {
+            node = existingNode;
+          }
         }
+
+        let nodeStack = [node];
+        let childNode;
+        while((childNode = nodeStack.pop())) {
+          const childNodeData = childNode.data;
+          if(childNodeData !== undefined) {
+            update(results, resultIndexes, increment, childNodeData);
+          }
+
+          for(let char in childNode) {
+            nodeStack.push(childNode[char]);
+          }
+        }
+
+
+        return results;
       }
-
-      const lastTerm = terms[exactTermsLength];
-      let node = index;
-
-      for(let i = 0; i < lastTerm.length; i++) {
-        const existingNode = node[lastTerm[i]];
-        if(existingNode === undefined) {
-          break;
-        } else {
-          node = existingNode;
-        }
-      }
-
-      let nodeStack = [node];
-      let childNode;
-      while((childNode = nodeStack.pop())) {
-        const childNodeData = childNode.data;
-        if(childNodeData !== undefined) {
-          update(results, resultIndexes, increment, childNodeData);
-        }
-
-        for(let char in childNode) {
-          nodeStack.push(childNode[char]);
-        }
-      }
-
-
-      return results;
     }
   }
 
