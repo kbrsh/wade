@@ -6,6 +6,6 @@
     module.exports = factory();
   }
 }(this, function() {
-    //=require ./index.js
+    //=require ../dist/wade.js
     return Wade;
 }));

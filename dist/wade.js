@@ -13,91 +13,43 @@
     module.exports = factory();
   }
 }(this, function() {
-    var stopWords = ['about', 'after', 'all', 'also', 'am', 'an', 'and', 'another', 'any', 'are', 'as', 'at', 'be', 'because', 'been', 'before', 'being', 'between', 'both', 'but', 'by', 'came', 'can', 'come', 'could', 'did', 'do', 'each', 'for', 'from', 'get', 'got', 'has', 'had', 'he', 'have', 'her', 'here', 'him', 'himself', 'his', 'how', 'if', 'in', 'into', 'is', 'it', 'like', 'make', 'many', 'me', 'might', 'more', 'most', 'much', 'must', 'my', 'never', 'now', 'of', 'on', 'only', 'or', 'other', 'our', 'out', 'over', 'said', 'same', 'see', 'should', 'since', 'some', 'still', 'such', 'take', 'than', 'that', 'the', 'their', 'them', 'then', 'there', 'these', 'they', 'this', 'those', 'through', 'to', 'too', 'under', 'up', 'very', 'was', 'way', 'we', 'well', 'were', 'what', 'where', 'which', 'while', 'who', 'with', 'would', 'you', 'your', 'a', 'i'];
-    var punctuationRE = /[.,!?:;"']/g;
+    var whitespaceRE = /\s+/g;
+    
     var config = {
-      stopWords: stopWords,
-      punctuationRE: punctuationRE
+      stopWords: ["about", "after", "all", "also", "am", "an", "and", "another", "any", "are", "as", "at", "be", "because", "been", "before", "being", "between", "both", "but", "by", "came", "can", "come", "could", "did", "do", "each", "for", "from", "get", "got", "has", "had", "he", "have", "her", "here", "him", "himself", "his", "how", "if", "in", "into", "is", "it", "like", "make", "many", "me", "might", "more", "most", "much", "must", "my", "never", "now", "of", "on", "only", "or", "other", "our", "out", "over", "said", "same", "see", "should", "since", "some", "still", "such", "take", "than", "that", "the", "their", "them", "then", "there", "these", "they", "this", "those", "through", "to", "too", "under", "up", "very", "was", "way", "we", "well", "were", "what", "where", "which", "while", "who", "with", "would", "you", "your", "a", "i"],
+      punctuationRE: /[.,!?:;"']/g
     };
     
-    var getRoot = function(pattern, index) {
-      var node = index;
-    
-      for(var i = 0; i < pattern.length; i++) {
-        var char = pattern[i];
-        node = node[char];
-        if(node === undefined) {
-          break;
-        }
-      }
-    
-      return node;
-    }
-    
-    var updateResults = function(id, results, resultsLocations, scoreIncrement) {
-      var location = null;
-    
-      for(var i = 0; i < id.length; i++) {
-        var documentID = id[i];
-        location = resultsLocations[documentID];
-    
-        if(location === undefined) {
-          resultsLocations[documentID] = results.length;
-          results.push({
-            index: documentID,
-            score: scoreIncrement
-          });
+    var update = function(results, resultIndexes, increment, data) {
+      var relevance = data[0];
+      for(var i = 1; i < data.length; i++) {
+        var index = data[i];
+        var resultIndex = resultIndexes[index];
+        if(resultIndex === undefined) {
+          var lastIndex = results.length;
+          resultIndexes[index] = lastIndex;
+          results[lastIndex] = {
+            index: index,
+            score: relevance * increment
+          };
         } else {
-          results[location].score += scoreIncrement;
+          results[resultIndex].score += relevance * increment;
         }
       }
     }
     
-    var contains = function(pattern, index, results, resultsLocations, scoreIncrement) {
-      var node = getRoot(pattern, index);
+    var getTerms = function(str) {
+      var terms = str.split(whitespaceRE);
     
-      if(node !== undefined && node.id !== undefined) {
-        updateResults(node.id, results, resultsLocations, scoreIncrement);
-      }
-    }
-    
-    var containsPrefix = function(pattern, index, results, resultsLocations, scoreIncrement) {
-      var node = getRoot(pattern, index);
-    
-      if(node !== undefined) {
-        var stack = [node];
-        var current = null;
-        var currentIndex = 0;
-    
-        while(stack.length !== 0) {
-          current = stack[currentIndex];
-          if(current.id !== undefined) {
-            updateResults(current.id, results, resultsLocations, scoreIncrement);
-          }
-    
-          stack.pop();
-          currentIndex--;
-    
-          for(var child in current) {
-            stack.push(current[child]);
-            currentIndex++;
-          }
-        }
-      }
-    }
-    
-    var getWords = function(str) {
-      var lastIndex = str.length - 1;
-    
-      if(str[0] === " ") {
-        str = str.substring(1);
+      if(terms[0].length === 0) {
+        terms.shift();
       }
     
-      if(str[lastIndex] === " ") {
-        str = str.substring(0, lastIndex);
+      if(terms[terms.length - 1].length === 0) {
+        terms.pop();
       }
     
-      return str.split(" ");
+      return terms;
     }
     
     var lowercase = function(str) {
@@ -105,56 +57,91 @@
     }
     
     var removePunctuation = function(str) {
-      return str.replace(config.punctuationRE, "");
+      return str.replace(config.punctuationRE, '');
     }
     
     var removeStopWords = function(str) {
-      var words = getWords(str);
-      var i = words.length;
+      var stopWords = config.stopWords;
+      var terms = getTerms(str);
+      var i = terms.length;
     
       while((i--) !== 0) {
-        if(Wade.config.stopWords.indexOf(words[i]) !== -1) {
-          words.splice(i, 1);
+        if(stopWords.indexOf(terms[i]) !== -1) {
+          terms.splice(i, 1);
         }
       }
     
-      return words.join(" ");
+      return terms.join(' ');
     }
     
     var Wade = function(data) {
       var search = function(item) {
         var index = search.index;
-        var processed = Wade.process(item);
-    
-        if(processed === false) {
-          return [];
-        }
-    
-        var keywords = getWords(processed);
-        var keywordsLength = keywords.length;
-        var fullWordsLength = keywordsLength - 1;
-        var scoreIncrement = 1 / keywordsLength;
+        var terms = getTerms(item);
+        var termsLength = terms.length;
+        var exactTermsLength = termsLength - 1;
+        var increment = 1 / termsLength;
         var results = [];
-        var resultsLocations = {};
+        var resultIndexes = {};
     
-        for(var i = 0; i < fullWordsLength; i++) {
-          contains(keywords[i], index, results, resultsLocations, scoreIncrement);
+        if(termsLength === 0) {
+          return results;
+        } else {
+          exactOuter: for(var i = 0; i < exactTermsLength; i++) {
+            var term = terms[i];
+            var node = index;
+    
+            for(var j = 0; j < term.length; j++) {
+              node = node[term[j]];
+              if(node === undefined) {
+                continue exactOuter;
+              }
+            }
+    
+            var nodeData = node.data;
+            if(nodeData !== undefined) {
+              update(results, resultIndexes, increment, nodeData);
+            }
+          }
+    
+          var lastTerm = terms[exactTermsLength];
+          var node$1 = index;
+    
+          for(var i$1 = 0; i$1 < lastTerm.length; i$1++) {
+            var existingNode = node$1[lastTerm[i$1]];
+            if(existingNode === undefined) {
+              break;
+            } else {
+              node$1 = existingNode;
+            }
+          }
+    
+          var nodeStack = [node$1];
+          var childNode;
+          while((childNode = nodeStack.pop())) {
+            var childNodeData = childNode.data;
+            if(childNodeData !== undefined) {
+              update(results, resultIndexes, increment, childNodeData);
+            }
+    
+            for(var char in childNode) {
+              nodeStack.push(childNode[char]);
+            }
+          }
+    
+    
+          return results;
         }
-    
-        containsPrefix(keywords[fullWordsLength], index, results, resultsLocations, scoreIncrement);
-    
-        return results;
       }
     
-      if(Array.isArray(data)) {
+      if(Array.isArray(data) === true) {
         var dataLength = data.length;
-        var normalizedData = new Array(dataLength);
-        var item = null;
+        var normalizedData = [];
     
         for(var i = 0; i < dataLength; i++) {
-          item = Wade.process(data[i]);
-          if(item !== false) {
-            normalizedData[i] = item;
+          var item = Wade.process(data[i]);
+          if(item.length !== 0) {
+            normalizedData.push(item);
           }
         }
     
@@ -173,54 +160,80 @@
     Wade.process = function(item) {
       var pipeline = Wade.pipeline;
     
-      for(var j = 0; j < pipeline.length; j++) {
-        item = pipeline[j](item);
+      for(var i = 0; i < pipeline.length; i++) {
+        item = pipeline[i](item);
       }
     
-      if(item.length === 0) {
-        return false;
-      } else {
-        return item;
-      }
+      return item;
     }
     
     Wade.index = function(data) {
+      var dataLength = data.length;
       var index = {};
-      for(var i = 0; i < data.length; i++) {
-        var entry = data[i];
-        if(entry === undefined) {
-          continue;
-        }
-        
-        var str = getWords(entry);
-        for(var j = 0; j < str.length; j++) {
-          var item = str[j];
-          var itemLength = item.length - 1;
+      var termsLengths = [];
+      var nodes = [];
+    
+      for(var i = 0; i < dataLength; i++) {
+        var terms = getTerms(data[i]);
+        var termsLength = terms.length;
+    
+        termsLengths.push(termsLength);
+    
+        for(var j = 0; j < termsLength; j++) {
+          var term = terms[j];
+          var termLength = term.length - 1;
           var node = index;
     
-          for(var n = 0; n < itemLength; n++) {
-            var char = item[n];
-            var newNode = node[char];
-            newNode = newNode === undefined ? {} : newNode;
-            node[char] = newNode;
-            node = newNode;
+          for(var n = 0; n < termLength; n++) {
+            var char = term[n];
+            var existingNode = node[char];
+    
+            if(existingNode === undefined) {
+              existingNode = node[char] = {};
+            }
+    
+            node = existingNode;
           }
     
-          var lastChar = item[itemLength];
+          var lastChar = term[termLength];
           if(node[lastChar] === undefined) {
-            node[lastChar] = {
-              id: [i]
-            }
+            node = node[lastChar] = {
+              data: [1, i]
+            };
+            nodes.push(node);
           } else {
             node = node[lastChar];
-            if(node.id === undefined) {
-              node.id = [i];
+            var nodeData = node.data;
+    
+            if(data === undefined) {
+              node.data = [1, i];
+              nodes.push(node);
             } else {
-              node.id.push(i);
+              nodeData.push(i);
             }
           }
         }
       }
+    
+      for(var i$1 = 0; i$1 < nodes.length; i$1++) {
+        var node$1 = nodes[i$1];
+        var nodeData$1 = node$1.data;
+        var currentLength = 1;
+        var currentAverage = 0;
+    
+        for(var j$1 = 1; j$1 < nodeData$1.length; j$1++) {
+          var dataIndex = nodeData$1[j$1];
+          if(nodeData$1[j$1 + 1] === dataIndex) {
+            currentLength++;
+          } else {
+            currentAverage += currentLength / termsLengths[dataIndex];
+            currentLength = 1;
+          }
+        }
+    
+        nodeData$1[0] = 1.5 - (currentAverage / dataLength);
+      }
+    
       return index;
     }
     

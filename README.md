@@ -104,7 +104,9 @@ The algorithm behind the search is fairly simple. First, a trie data structure i
 * The search query is processed through the pipeline
 * The search query is then tokenized into keywords
 * Each keyword except the last is searched for and scores for each item in the data are updated according to the amount of keywords that appear in the document.
-* The last keyword is treated as a prefix, and Wade performs a depth-first search and updates the score for all data prefixed with this keyword. The score is added depending on how much of the word was included in the prefix. This allows for searching as a user types.
+* The last keyword is treated as a prefix, and Wade performs a depth-first search and updates the score for all data prefixed with this keyword. The score is added depending on how much of the word was included in the prefix, and how relevant the word is to the data. This allows for searching as a user types.
+
+A more in-depth explanation of the algorithm is available [here](https://raw.githubusercontent.com/kbrsh/wade/master/Wade.pdf).
 
 ### License
 

@@ -8,14 +8,16 @@ describe("Search Index", function() {
       "h": {
         "e": {
           "y": {
-            "id": [
+            "data": [
+              1.1666666666666667,
               0
             ]
           },
           "l": {
             "l": {
               "o": {
-                "id": [
+                "data": [
+                  1.1666666666666667,
                   1
                 ]
               }
@@ -29,7 +31,8 @@ describe("Search Index", function() {
             "n": {
               "c": {
                 "h": {
-                  "id": [
+                  "data": [
+                    1.1666666666666667,
                     2
                   ]
                 }
