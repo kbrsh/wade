@@ -6,24 +6,6 @@ let config = {
   processors: []
 };
 
-const update = function(results, resultIndexes, increment, data) {
-  const relevance = data[0];
-  for(let i = 1; i < data.length; i++) {
-    const index = data[i];
-    const resultIndex = resultIndexes[index];
-    if(resultIndex === undefined) {
-      const lastIndex = results.length;
-      resultIndexes[index] = lastIndex;
-      results[lastIndex] = {
-        index: index,
-        score: relevance * increment
-      };
-    } else {
-      results[resultIndex].score += relevance * increment;
-    }
-  }
-}
-
 const getTerms = function(entry) {
   let terms = entry.split(whitespaceRE);
 
@@ -76,6 +58,24 @@ const processEntry = function(entry) {
   }
 }
 
+const update = function(results, resultIndexes, increment, data) {
+  const relevance = data[0];
+  for(let i = 1; i < data.length; i++) {
+    const index = data[i];
+    const resultIndex = resultIndexes[index];
+    if(resultIndex === undefined) {
+      const lastIndex = results.length;
+      resultIndexes[index] = lastIndex;
+      results[lastIndex] = {
+        index: index,
+        score: relevance * increment
+      };
+    } else {
+      results[resultIndex].score += relevance * increment;
+    }
+  }
+}
+
 const Wade = function(data) {
   const search = function(query) {
     const index = search.index;
@@ -91,53 +91,49 @@ const Wade = function(data) {
       const exactTermsLength = termsLength - 1;
       const increment = 1 / termsLength;
 
-      if(termsLength === 0) {
-        return results;
-      } else {
-        exactOuter: for(let i = 0; i < exactTermsLength; i++) {
-          const term = terms[i];
-          let node = index;
-
-          for(let j = 0; j < term.length; j++) {
-            node = node[term[j]];
-            if(node === undefined) {
-              continue exactOuter;
-            }
-          }
-
-          const nodeData = node.data;
-          if(nodeData !== undefined) {
-            update(results, resultIndexes, increment, nodeData);
-          }
-        }
-
-        const lastTerm = terms[exactTermsLength];
+      exactOuter: for(let i = 0; i < exactTermsLength; i++) {
+        const term = terms[i];
         let node = index;
 
-        for(let i = 0; i < lastTerm.length; i++) {
-          node = node[lastTerm[i]];
+        for(let j = 0; j < term.length; j++) {
+          node = node[term[j]];
           if(node === undefined) {
-            break;
+            continue exactOuter;
           }
         }
 
-        if(node !== undefined) {
-          let nodeStack = [node];
-          let childNode;
-          while((childNode = nodeStack.pop())) {
-            const childNodeData = childNode.data;
-            if(childNodeData !== undefined) {
-              update(results, resultIndexes, increment, childNodeData);
-            }
-
-            for(let char in childNode) {
-              nodeStack.push(childNode[char]);
-            }
-          }
+        const nodeData = node.data;
+        if(nodeData !== undefined) {
+          update(results, resultIndexes, increment, nodeData);
         }
-
-        return results;
       }
+
+      const lastTerm = terms[exactTermsLength];
+      let node = index;
+
+      for(let i = 0; i < lastTerm.length; i++) {
+        node = node[lastTerm[i]];
+        if(node === undefined) {
+          break;
+        }
+      }
+
+      if(node !== undefined) {
+        let nodeStack = [node];
+        let childNode;
+        while((childNode = nodeStack.pop())) {
+          const childNodeData = childNode.data;
+          if(childNodeData !== undefined) {
+            update(results, resultIndexes, increment, childNodeData);
+          }
+
+          for(let char in childNode) {
+            nodeStack.push(childNode[char]);
+          }
+        }
+      }
+
+      return results;
     }
   }
 
@@ -153,7 +149,6 @@ const Wade = function(data) {
 Wade.index = function(data) {
   const dataLength = data.length;
   let index = {};
-  let termsLengths = [];
   let nodes = [];
 
   for(let i = 0; i < dataLength; i++) {
@@ -161,8 +156,6 @@ Wade.index = function(data) {
     if(entry.length !== 0) {
       const terms = getTerms(entry);
       const termsLength = terms.length;
-
-      termsLengths.push(termsLength);
 
       for(let j = 0; j < termsLength; j++) {
         const term = terms[j];
@@ -183,7 +176,7 @@ Wade.index = function(data) {
         const lastChar = term[termLength];
         if(node[lastChar] === undefined) {
           node = node[lastChar] = {
-            data: [1, i]
+            data: [1 / termsLength, i]
           };
           nodes.push(node);
         } else {
@@ -191,9 +184,10 @@ Wade.index = function(data) {
           const nodeData = node.data;
 
           if(nodeData === undefined) {
-            node.data = [1, i];
+            node.data = [1 / termsLength, i];
             nodes.push(node);
           } else {
+            nodeData[0] += 1 / termsLength;
             nodeData.push(i);
           }
         }
@@ -202,22 +196,8 @@ Wade.index = function(data) {
   }
 
   for(let i = 0; i < nodes.length; i++) {
-    const node = nodes[i];
-    let nodeData = node.data;
-    let currentLength = 1;
-    let currentAverage = 0;
-
-    for(let j = 1; j < nodeData.length; j++) {
-      const dataIndex = nodeData[j];
-      if(nodeData[j + 1] === dataIndex) {
-        currentLength++;
-      } else {
-        currentAverage += currentLength / termsLengths[dataIndex];
-        currentLength = 1;
-      }
-    }
-
-    nodeData[0] = 1.5 - (currentAverage / dataLength);
+    let nodeData = nodes[i].data;
+    nodeData[0] = 1.5 - (nodeData[0] / dataLength);
   }
 
   return index;

@@ -21,24 +21,6 @@
       processors: []
     };
     
-    var update = function(results, resultIndexes, increment, data) {
-      var relevance = data[0];
-      for(var i = 1; i < data.length; i++) {
-        var index = data[i];
-        var resultIndex = resultIndexes[index];
-        if(resultIndex === undefined) {
-          var lastIndex = results.length;
-          resultIndexes[index] = lastIndex;
-          results[lastIndex] = {
-            index: index,
-            score: relevance * increment
-          };
-        } else {
-          results[resultIndex].score += relevance * increment;
-        }
-      }
-    }
-    
     var getTerms = function(entry) {
       var terms = entry.split(whitespaceRE);
     
@@ -91,6 +73,24 @@
       }
     }
     
+    var update = function(results, resultIndexes, increment, data) {
+      var relevance = data[0];
+      for(var i = 1; i < data.length; i++) {
+        var index = data[i];
+        var resultIndex = resultIndexes[index];
+        if(resultIndex === undefined) {
+          var lastIndex = results.length;
+          resultIndexes[index] = lastIndex;
+          results[lastIndex] = {
+            index: index,
+            score: relevance * increment
+          };
+        } else {
+          results[resultIndex].score += relevance * increment;
+        }
+      }
+    }
+    
     var Wade = function(data) {
       var search = function(query) {
         var index = search.index;
@@ -106,53 +106,49 @@
           var exactTermsLength = termsLength - 1;
           var increment = 1 / termsLength;
     
-          if(termsLength === 0) {
-            return results;
-          } else {
-            exactOuter: for(var i = 0; i < exactTermsLength; i++) {
-              var term = terms[i];
-              var node = index;
+          exactOuter: for(var i = 0; i < exactTermsLength; i++) {
+            var term = terms[i];
+            var node = index;
     
-              for(var j = 0; j < term.length; j++) {
-                node = node[term[j]];
-                if(node === undefined) {
-                  continue exactOuter;
-                }
-              }
-    
-              var nodeData = node.data;
-              if(nodeData !== undefined) {
-                update(results, resultIndexes, increment, nodeData);
+            for(var j = 0; j < term.length; j++) {
+              node = node[term[j]];
+              if(node === undefined) {
+                continue exactOuter;
               }
             }
     
-            var lastTerm = terms[exactTermsLength];
-            var node$1 = index;
-    
-            for(var i$1 = 0; i$1 < lastTerm.length; i$1++) {
-              node$1 = node$1[lastTerm[i$1]];
-              if(node$1 === undefined) {
-                break;
-              }
+            var nodeData = node.data;
+            if(nodeData !== undefined) {
+              update(results, resultIndexes, increment, nodeData);
             }
-    
-            if(node$1 !== undefined) {
-              var nodeStack = [node$1];
-              var childNode;
-              while((childNode = nodeStack.pop())) {
-                var childNodeData = childNode.data;
-                if(childNodeData !== undefined) {
-                  update(results, resultIndexes, increment, childNodeData);
-                }
-    
-                for(var char in childNode) {
-                  nodeStack.push(childNode[char]);
-                }
-              }
-            }
-    
-            return results;
           }
+    
+          var lastTerm = terms[exactTermsLength];
+          var node$1 = index;
+    
+          for(var i$1 = 0; i$1 < lastTerm.length; i$1++) {
+            node$1 = node$1[lastTerm[i$1]];
+            if(node$1 === undefined) {
+              break;
+            }
+          }
+    
+          if(node$1 !== undefined) {
+            var nodeStack = [node$1];
+            var childNode;
+            while((childNode = nodeStack.pop())) {
+              var childNodeData = childNode.data;
+              if(childNodeData !== undefined) {
+                update(results, resultIndexes, increment, childNodeData);
+              }
+    
+              for(var char in childNode) {
+                nodeStack.push(childNode[char]);
+              }
+            }
+          }
+    
+          return results;
         }
       }
     
@@ -168,7 +164,6 @@
     Wade.index = function(data) {
       var dataLength = data.length;
       var index = {};
-      var termsLengths = [];
       var nodes = [];
     
       for(var i = 0; i < dataLength; i++) {
@@ -176,8 +171,6 @@
         if(entry.length !== 0) {
           var terms = getTerms(entry);
           var termsLength = terms.length;
-    
-          termsLengths.push(termsLength);
     
           for(var j = 0; j < termsLength; j++) {
             var term = terms[j];
@@ -198,7 +191,7 @@
             var lastChar = term[termLength];
             if(node[lastChar] === undefined) {
               node = node[lastChar] = {
-                data: [1, i]
+                data: [1 / termsLength, i]
               };
               nodes.push(node);
             } else {
@@ -206,9 +199,10 @@
               var nodeData = node.data;
     
               if(nodeData === undefined) {
-                node.data = [1, i];
+                node.data = [1 / termsLength, i];
                 nodes.push(node);
               } else {
+                nodeData[0] += 1 / termsLength;
                 nodeData.push(i);
               }
             }
@@ -217,22 +211,8 @@
       }
     
       for(var i$1 = 0; i$1 < nodes.length; i$1++) {
-        var node$1 = nodes[i$1];
-        var nodeData$1 = node$1.data;
-        var currentLength = 1;
-        var currentAverage = 0;
-    
-        for(var j$1 = 1; j$1 < nodeData$1.length; j$1++) {
-          var dataIndex = nodeData$1[j$1];
-          if(nodeData$1[j$1 + 1] === dataIndex) {
-            currentLength++;
-          } else {
-            currentAverage += currentLength / termsLengths[dataIndex];
-            currentLength = 1;
-          }
-        }
-    
-        nodeData$1[0] = 1.5 - (currentAverage / dataLength);
+        var nodeData$1 = nodes[i$1].data;
+        nodeData$1[0] = 1.5 - (nodeData$1[0] / dataLength);
       }
     
       return index;
