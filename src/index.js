@@ -115,24 +115,24 @@ const Wade = function(data) {
         let node = index;
 
         for(let i = 0; i < lastTerm.length; i++) {
-          const existingNode = node[lastTerm[i]];
-          if(existingNode === undefined) {
+          node = node[lastTerm[i]];
+          if(node === undefined) {
             break;
-          } else {
-            node = existingNode;
           }
         }
 
-        let nodeStack = [node];
-        let childNode;
-        while((childNode = nodeStack.pop())) {
-          const childNodeData = childNode.data;
-          if(childNodeData !== undefined) {
-            update(results, resultIndexes, increment, childNodeData);
-          }
+        if(node !== undefined) {
+          let nodeStack = [node];
+          let childNode;
+          while((childNode = nodeStack.pop())) {
+            const childNodeData = childNode.data;
+            if(childNodeData !== undefined) {
+              update(results, resultIndexes, increment, childNodeData);
+            }
 
-          for(let char in childNode) {
-            nodeStack.push(childNode[char]);
+            for(let char in childNode) {
+              nodeStack.push(childNode[char]);
+            }
           }
         }
 

@@ -130,24 +130,24 @@
             var node$1 = index;
     
             for(var i$1 = 0; i$1 < lastTerm.length; i$1++) {
-              var existingNode = node$1[lastTerm[i$1]];
-              if(existingNode === undefined) {
+              node$1 = node$1[lastTerm[i$1]];
+              if(node$1 === undefined) {
                 break;
-              } else {
-                node$1 = existingNode;
               }
             }
     
-            var nodeStack = [node$1];
-            var childNode;
-            while((childNode = nodeStack.pop())) {
-              var childNodeData = childNode.data;
-              if(childNodeData !== undefined) {
-                update(results, resultIndexes, increment, childNodeData);
-              }
+            if(node$1 !== undefined) {
+              var nodeStack = [node$1];
+              var childNode;
+              while((childNode = nodeStack.pop())) {
+                var childNodeData = childNode.data;
+                if(childNodeData !== undefined) {
+                  update(results, resultIndexes, increment, childNodeData);
+                }
     
-              for(var char in childNode) {
-                nodeStack.push(childNode[char]);
+                for(var char in childNode) {
+                  nodeStack.push(childNode[char]);
+                }
               }
             }
     
