@@ -3,7 +3,27 @@ const whitespaceRE = /\s+/g;
 let config = {
   stopWords: ["about", "after", "all", "also", "am", "an", "and", "another", "any", "are", "as", "at", "be", "because", "been", "before", "being", "between", "both", "but", "by", "came", "can", "come", "could", "did", "do", "each", "for", "from", "get", "got", "has", "had", "he", "have", "her", "here", "him", "himself", "his", "how", "if", "in", "into", "is", "it", "like", "make", "many", "me", "might", "more", "most", "much", "must", "my", "never", "now", "of", "on", "only", "or", "other", "our", "out", "over", "said", "same", "see", "should", "since", "some", "still", "such", "take", "than", "that", "the", "their", "them", "then", "there", "these", "they", "this", "those", "through", "to", "too", "under", "up", "very", "was", "way", "we", "well", "were", "what", "where", "which", "while", "who", "with", "would", "you", "your", "a", "i"],
   punctuationRE: /[.,!?:;"']/g,
-  processors: []
+  processors: [
+    function(entry) {
+      return entry.toLowerCase();
+    },
+    function(entry) {
+      return entry.replace(config.punctuationRE, '');
+    },
+    function(entry) {
+      const stopWords = config.stopWords;
+      let terms = getTerms(entry);
+      let i = terms.length;
+
+      while((i--) !== 0) {
+        if(stopWords.indexOf(terms[i]) !== -1) {
+          terms.splice(i, 1);
+        }
+      }
+
+      return terms.join(' ');
+    }
+  ]
 };
 
 const getTerms = function(entry) {
@@ -19,30 +39,6 @@ const getTerms = function(entry) {
 
   return terms;
 }
-
-const lowercase = function(entry) {
-  return entry.toLowerCase();
-}
-
-const removePunctuation = function(entry) {
-  return entry.replace(config.punctuationRE, '');
-}
-
-const removeStopWords = function(entry) {
-  const stopWords = config.stopWords;
-  let terms = getTerms(entry);
-  let i = terms.length;
-
-  while((i--) !== 0) {
-    if(stopWords.indexOf(terms[i]) !== -1) {
-      terms.splice(i, 1);
-    }
-  }
-
-  return terms.join(' ');
-}
-
-config.processors = [lowercase, removePunctuation, removeStopWords];
 
 const processEntry = function(entry) {
   if(entry.length === 0) {
