@@ -61,29 +61,29 @@ Later, you can get the same search function without having Wade recreate an inde
 const search = Wade(instance);
 ```
 
-### Pipeline
+### Processors
 
-Wade uses a pipeline to preprocess data and search queries. By default, this pipeline will:
+Wade uses a set of processors to preprocess data and search queries. By default, these will:
 
 * Make everything lowercase
 * Remove punctuation
 * Remove stop words
 
-A pipeline consists of different functions that process a string and modify it in some way, and return the string.
+A process consists of different functions that process a string and modify it in some way, and return the transformed string.
 
-You can easily modify the pipeline as it is available in `Wade.pipeline`, for example:
+You can easily modify the processors as they are available in `Wade.config.processors`, for example:
 
 ```js
 // Don't preprocess at all
-Wade.pipeline = [];
+Wade.config.processors = [];
 
 // Add custom processor to remove periods
-Wade.pipeline.push(function(str) {
+Wade.config.processors.push(function(str) {
   return str.replace(/\./g, "");
 });
 ```
 
-All functions will be executed in the order of the pipeline (0-n) and they will be used on each document in the data.
+All functions will be executed in the order of the array (0-n) and they will be used on each document in the data.
 
 The stop words can be configured to include any words you like, and you can access the array of stop words by using:
 

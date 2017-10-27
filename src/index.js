@@ -2,7 +2,8 @@ const whitespaceRE = /\s+/g;
 
 let config = {
   stopWords: ["about", "after", "all", "also", "am", "an", "and", "another", "any", "are", "as", "at", "be", "because", "been", "before", "being", "between", "both", "but", "by", "came", "can", "come", "could", "did", "do", "each", "for", "from", "get", "got", "has", "had", "he", "have", "her", "here", "him", "himself", "his", "how", "if", "in", "into", "is", "it", "like", "make", "many", "me", "might", "more", "most", "much", "must", "my", "never", "now", "of", "on", "only", "or", "other", "our", "out", "over", "said", "same", "see", "should", "since", "some", "still", "such", "take", "than", "that", "the", "their", "them", "then", "there", "these", "they", "this", "those", "through", "to", "too", "under", "up", "very", "was", "way", "we", "well", "were", "what", "where", "which", "while", "who", "with", "would", "you", "your", "a", "i"],
-  punctuationRE: /[.,!?:;"']/g
+  punctuationRE: /[.,!?:;"']/g,
+  processors: []
 };
 
 const update = function(results, resultIndexes, increment, data) {
@@ -23,8 +24,8 @@ const update = function(results, resultIndexes, increment, data) {
   }
 }
 
-const getTerms = function(str) {
-  let terms = str.split(whitespaceRE);
+const getTerms = function(entry) {
+  let terms = entry.split(whitespaceRE);
 
   if(terms[0].length === 0) {
     terms.shift();
@@ -37,17 +38,17 @@ const getTerms = function(str) {
   return terms;
 }
 
-const lowercase = function(str) {
-  return str.toLowerCase();
+const lowercase = function(entry) {
+  return entry.toLowerCase();
 }
 
-const removePunctuation = function(str) {
-  return str.replace(config.punctuationRE, '');
+const removePunctuation = function(entry) {
+  return entry.replace(config.punctuationRE, '');
 }
 
-const removeStopWords = function(str) {
+const removeStopWords = function(entry) {
   const stopWords = config.stopWords;
-  let terms = getTerms(str);
+  let terms = getTerms(entry);
   let i = terms.length;
 
   while((i--) !== 0) {
@@ -59,10 +60,26 @@ const removeStopWords = function(str) {
   return terms.join(' ');
 }
 
+config.processors = [lowercase, removePunctuation, removeStopWords];
+
+const processEntry = function(entry) {
+  if(entry.length === 0) {
+    return entry;
+  } else {
+    const processors = config.processors;
+
+    for(let i = 0; i < processors.length; i++) {
+      entry = processors[i](entry);
+    }
+
+    return entry;
+  }
+}
+
 const Wade = function(data) {
   const search = function(query) {
     const index = search.index;
-    const processed = Wade.process(query);
+    const processed = processEntry(query);
     let results = [];
     let resultIndexes = {};
 
@@ -133,22 +150,6 @@ const Wade = function(data) {
   return search;
 }
 
-Wade.pipeline = [lowercase, removePunctuation, removeStopWords];
-
-Wade.process = function(entry) {
-  if(entry.length === 0) {
-    return entry;
-  } else {
-    const pipeline = Wade.pipeline;
-
-    for(let i = 0; i < pipeline.length; i++) {
-      entry = pipeline[i](entry);
-    }
-
-    return entry;
-  }
-}
-
 Wade.index = function(data) {
   const dataLength = data.length;
   let index = {};
@@ -156,7 +157,7 @@ Wade.index = function(data) {
   let nodes = [];
 
   for(let i = 0; i < dataLength; i++) {
-    const entry = Wade.process(data[i]);
+    const entry = processEntry(data[i]);
     if(entry.length !== 0) {
       const terms = getTerms(entry);
       const termsLength = terms.length;

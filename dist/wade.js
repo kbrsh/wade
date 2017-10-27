@@ -17,7 +17,8 @@
     
     var config = {
       stopWords: ["about", "after", "all", "also", "am", "an", "and", "another", "any", "are", "as", "at", "be", "because", "been", "before", "being", "between", "both", "but", "by", "came", "can", "come", "could", "did", "do", "each", "for", "from", "get", "got", "has", "had", "he", "have", "her", "here", "him", "himself", "his", "how", "if", "in", "into", "is", "it", "like", "make", "many", "me", "might", "more", "most", "much", "must", "my", "never", "now", "of", "on", "only", "or", "other", "our", "out", "over", "said", "same", "see", "should", "since", "some", "still", "such", "take", "than", "that", "the", "their", "them", "then", "there", "these", "they", "this", "those", "through", "to", "too", "under", "up", "very", "was", "way", "we", "well", "were", "what", "where", "which", "while", "who", "with", "would", "you", "your", "a", "i"],
-      punctuationRE: /[.,!?:;"']/g
+      punctuationRE: /[.,!?:;"']/g,
+      processors: []
     };
     
     var update = function(results, resultIndexes, increment, data) {
@@ -38,8 +39,8 @@
       }
     }
     
-    var getTerms = function(str) {
-      var terms = str.split(whitespaceRE);
+    var getTerms = function(entry) {
+      var terms = entry.split(whitespaceRE);
     
       if(terms[0].length === 0) {
         terms.shift();
@@ -52,17 +53,17 @@
       return terms;
     }
     
-    var lowercase = function(str) {
-      return str.toLowerCase();
+    var lowercase = function(entry) {
+      return entry.toLowerCase();
     }
     
-    var removePunctuation = function(str) {
-      return str.replace(config.punctuationRE, '');
+    var removePunctuation = function(entry) {
+      return entry.replace(config.punctuationRE, '');
     }
     
-    var removeStopWords = function(str) {
+    var removeStopWords = function(entry) {
       var stopWords = config.stopWords;
-      var terms = getTerms(str);
+      var terms = getTerms(entry);
       var i = terms.length;
     
       while((i--) !== 0) {
@@ -74,10 +75,26 @@
       return terms.join(' ');
     }
     
+    config.processors = [lowercase, removePunctuation, removeStopWords];
+    
+    var processEntry = function(entry) {
+      if(entry.length === 0) {
+        return entry;
+      } else {
+        var processors = config.processors;
+    
+        for(var i = 0; i < processors.length; i++) {
+          entry = processors[i](entry);
+        }
+    
+        return entry;
+      }
+    }
+    
     var Wade = function(data) {
       var search = function(query) {
         var index = search.index;
-        var processed = Wade.process(query);
+        var processed = processEntry(query);
         var results = [];
         var resultIndexes = {};
     
@@ -148,22 +165,6 @@
       return search;
     }
     
-    Wade.pipeline = [lowercase, removePunctuation, removeStopWords];
-    
-    Wade.process = function(entry) {
-      if(entry.length === 0) {
-        return entry;
-      } else {
-        var pipeline = Wade.pipeline;
-    
-        for(var i = 0; i < pipeline.length; i++) {
-          entry = pipeline[i](entry);
-        }
-    
-        return entry;
-      }
-    }
-    
     Wade.index = function(data) {
       var dataLength = data.length;
       var index = {};
@@ -171,7 +172,7 @@
       var nodes = [];
     
       for(var i = 0; i < dataLength; i++) {
-        var entry = Wade.process(data[i]);
+        var entry = processEntry(data[i]);
         if(entry.length !== 0) {
           var terms = getTerms(entry);
           var termsLength = terms.length;
