@@ -41,17 +41,13 @@ const getTerms = function(entry) {
 }
 
 const processEntry = function(entry) {
-  if(entry.length === 0) {
-    return entry;
-  } else {
-    const processors = config.processors;
+  const processors = config.processors;
 
-    for(let i = 0; i < processors.length; i++) {
-      entry = processors[i](entry);
-    }
-
-    return entry;
+  for(let i = 0; i < processors.length; i++) {
+    entry = processors[i](entry);
   }
+
+  return entry;
 }
 
 const update = function(results, resultIndexes, increment, data) {

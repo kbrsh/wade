@@ -56,17 +56,13 @@
     }
     
     var processEntry = function(entry) {
-      if(entry.length === 0) {
-        return entry;
-      } else {
-        var processors = config.processors;
+      var processors = config.processors;
     
-        for(var i = 0; i < processors.length; i++) {
-          entry = processors[i](entry);
-        }
-    
-        return entry;
+      for(var i = 0; i < processors.length; i++) {
+        entry = processors[i](entry);
       }
+    
+      return entry;
     }
     
     var update = function(results, resultIndexes, increment, data) {
