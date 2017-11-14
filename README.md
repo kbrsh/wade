@@ -99,7 +99,7 @@ Wade.config.punctuationRE = /[.!]/g; // should contain punctuation to remove
 
 ### Algorithm
 
-The algorithm behind the search is fairly simple. First, a trie data structure is generated off of the data. When performing a search, the following happens:
+The algorithm behind the search is fairly simple. First, a tree data structure is generated off of the data. When performing a search, the following happens:
 
 * The search query is processed through the pipeline
 * The search query is then tokenized into keywords
