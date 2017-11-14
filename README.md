@@ -33,7 +33,7 @@ search("App");
 /*
 [{
   index: 0,
-  score: 1
+  score: 1.25
 }]
 */
 ```
