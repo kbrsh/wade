@@ -23,7 +23,7 @@ CDN
 Initialize Wade with an array of strings.
 
 ```js
-const search = Wade(["Apple", "Orange", "Lemon", "Tomato"]);
+const search = Wade(["Apple", "Lemon", "Orange", "Tomato"]);
 ```
 
 Now you can search for a query within the array, and Wade will return the index of it, along with a score.
@@ -48,7 +48,7 @@ For example:
 
 ```js
 // Create the initial search function
-const search = Wade(["Apple", "Orange", "Lemon", "Tomato"]);
+const search = Wade(["Apple", "Lemon", "Orange", "Tomato"]);
 const instance = Wade.save(search);
 
 // Save `instance`
