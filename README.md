@@ -61,6 +61,8 @@ Later, you can get the same search function without having Wade recreate an inde
 const search = Wade(instance);
 ```
 
+`instance` can be saved to a file using using `JSON.stringify()` and loaded with `JSON.parse()`.
+
 ### Processors
 
 Wade uses a set of processors to preprocess data and search queries. By default, these will:
