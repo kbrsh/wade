@@ -101,12 +101,12 @@ Wade.config.punctuationRE = /[.!]/g; // should contain punctuation to remove
 
 ### Algorithm
 
-The algorithm behind the search is fairly simple. First, a trie data structure is generated off of the data. When performing a search, the following happens:
+First, an index is generated from the data. When performing a search, the following happens:
 
 * The search query is processed.
 * The search query is tokenized into keywords.
-* Each keyword except the last is searched for and scores for each item in the data are updated according to the amount of keywords that appear in the document.
-* The last keyword is treated as a prefix, and Wade performs a depth-first search and updates the score for all data prefixed with this keyword. The score is added depending on how much of the word was included in the prefix, and how relevant the word is to the data. This allows for searching as a user types.
+* Each term except the last is searched for exactly and scores for each item in the data are updated according to the relevance of the term to the data.
+* The last keyword is treated as a prefix, and Wade performs a depth-first search and updates the score for all data prefixed with this term using the relevance weight for the term. This allows for searching as a user types.
 
 In-depth explanations of the algorithm are available on the [blog post](https://blog.kabir.ml/posts/inside-wade.html) and [pdf](https://github.com/kbrsh/wade/blob/master/Wade.pdf).
 
