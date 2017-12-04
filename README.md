@@ -104,7 +104,7 @@ Wade.config.punctuationRE = /[.!]/g; // should contain punctuation to remove
 First, an index is generated from the data. When performing a search, the following happens:
 
 * The search query is processed.
-* The search query is tokenized into keywords.
+* The search query is tokenized into terms.
 * Each term except the last is searched for exactly and scores for each item in the data are updated according to the relevance of the term to the data.
 * The last keyword is treated as a prefix, and Wade performs a depth-first search and updates the score for all data prefixed with this term using the relevance weight for the term. This allows for searching as a user types.
 
@@ -112,7 +112,7 @@ In-depth explanations of the algorithm are available on the [blog post](https://
 
 ### Support
 
-Support Wade [on Patreon](https://patreon.com/kbrsh) to help sustain the development of the project. The maker of the project works on open source for free. If you or your company depend on this project, then it makes sense to donate to ensure that the project is maintained. 
+Support Wade [on Patreon](https://patreon.com/kbrsh) to help sustain the development of the project. The maker of the project works on open source for free. If you or your company depend on this project, then it makes sense to donate to ensure that the project is maintained.
 
 ### License
 
