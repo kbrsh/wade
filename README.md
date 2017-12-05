@@ -26,7 +26,7 @@ Initialize Wade with an array of strings.
 const search = Wade(["Apple", "Lemon", "Orange", "Tomato"]);
 ```
 
-Now you can search for a query within the array, and Wade will return the index of it, along with a score.
+Now you can search for a query within the data, and Wade will return results. Each result will include the index of the item in the data it corresponds to along with a score depending on the relevance of the query to the result.
 
 ```js
 search("App");
