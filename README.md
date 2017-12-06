@@ -20,7 +20,7 @@ CDN
 
 ### Usage
 
-Initialize Wade with an array of strings.
+Initialize Wade with an array of data.
 
 ```js
 const search = Wade(["Apple", "Lemon", "Orange", "Tomato"]);
