@@ -15,7 +15,7 @@ const pkg = require("./package.json");
 // Header comment
 const comment = `/**
  * Wade v${pkg.version}
- * Copyright 2017 Kabir Shah
+ * Copyright 2017-2018 Kabir Shah
  * Released under the MIT License
  * https://github.com/kbrsh/wade
  */\r\n`;
