@@ -38,11 +38,11 @@ search("App");
 */
 ```
 
-Combined with libraries like [Moon](http://moonjs.ga), you can create a [real-time search](http://moonjs.ga/examples/search/index.html).
+Combined with JavaScript libraries like [Moon](http://moonjs.ga), you can create a [real-time search](http://moonjs.ga/examples/search/index.html).
 
-### Loading/Saving Data
+### Loading/Saving Index
 
-To save data as an object, use `Wade.save` on your search function, and then use these later when initializing Wade.
+To save an index as an object, use `Wade.save` on a search function.
 
 For example:
 
