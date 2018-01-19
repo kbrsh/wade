@@ -163,7 +163,6 @@ Wade.index = function(data) {
       for(let j = 0; j < termsLength; j++) {
         const term = terms[j];
         let processedTerm = [i];
-        let node = index;
 
         for(let n = 0; n < term.length; n++) {
           const char = term.charCodeAt(n);

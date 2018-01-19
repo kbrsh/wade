@@ -178,7 +178,6 @@
           for(var j = 0; j < termsLength; j++) {
             var term = terms[j];
             var processedTerm = [i];
-            var node = index;
     
             for(var n = 0; n < term.length; n++) {
               var char = term.charCodeAt(n);
@@ -232,29 +231,29 @@
         var processedTerm$1 = processed[i$1 + 1];
         var processedTermLength = processedTerm$1.length - 1;
         var dataIndex = processedTerm$1[0];
-        var node$1 = index;
+        var node = index;
     
         for(var j$1 = 1; j$1 < processedTermLength; j$1++) {
           var char$1 = processedTerm$1[j$1] + offset;
-          var existingNode = node$1[char$1];
+          var existingNode = node[char$1];
     
           if(existingNode === undefined) {
-            existingNode = node$1[char$1] = new Array(size);
+            existingNode = node[char$1] = new Array(size);
           }
     
-          node$1 = existingNode;
+          node = existingNode;
         }
     
         var lastChar = processedTerm$1[processedTermLength] + offset;
-        if(node$1[lastChar] === undefined) {
-          node$1 = node$1[lastChar] = new Array(size);
-          nodeDataSets.push(node$1[0] = [1 / termsLength$1, dataIndex]);
+        if(node[lastChar] === undefined) {
+          node = node[lastChar] = new Array(size);
+          nodeDataSets.push(node[0] = [1 / termsLength$1, dataIndex]);
         } else {
-          node$1 = node$1[lastChar];
-          var nodeData = node$1[0];
+          node = node[lastChar];
+          var nodeData = node[0];
     
           if(nodeData === undefined) {
-            nodeDataSets.push(node$1[0] = [1 / termsLength$1, dataIndex]);
+            nodeDataSets.push(node[0] = [1 / termsLength$1, dataIndex]);
           } else {
             nodeData[0] += 1 / termsLength$1;
             nodeData.push(dataIndex);
