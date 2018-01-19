@@ -30,11 +30,12 @@ Now you can search for a query within the data, and Wade will return results. Ea
 
 ```js
 search("App");
+
 /*
-[{
-  index: 0,
-  score: 1.25
-}]
+  [{
+    index: 0,
+    score: 1.25
+  }]
 */
 ```
 
@@ -47,7 +48,7 @@ To save an index as an object, use `Wade.save` on a search function.
 For example:
 
 ```js
-// Create the initial search function
+// Create the search function
 const search = Wade(["Apple", "Lemon", "Orange", "Tomato"]);
 const instance = Wade.save(search);
 
