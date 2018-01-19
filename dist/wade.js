@@ -90,6 +90,7 @@
     var Wade = function(data) {
       var search = function(query) {
         var index = search.index;
+        var offset = index[0];
         var processed = processEntry(query);
         var results = [];
         var resultIndexes = {};
@@ -107,13 +108,13 @@
             var node = index;
     
             for(var j = 0; j < term.length; j++) {
-              node = node[term[j]];
+              node = node[term.charCodeAt(j) + offset];
               if(node === undefined) {
                 continue exactOuter;
               }
             }
     
-            var nodeData = node.data;
+            var nodeData = node[0];
             if(nodeData !== undefined) {
               update(results, resultIndexes, increment, nodeData);
             }
@@ -123,23 +124,27 @@
           var node$1 = index;
     
           for(var i$1 = 0; i$1 < lastTerm.length; i$1++) {
-            node$1 = node$1[lastTerm[i$1]];
+            node$1 = node$1[lastTerm.charCodeAt(i$1) + offset];
             if(node$1 === undefined) {
               break;
             }
           }
     
           if(node$1 !== undefined) {
-            var nodeStack = [node$1];
-            var childNode;
-            while((childNode = nodeStack.pop())) {
-              var childNodeData = childNode.data;
+            var nodes = [node$1];
+            for(var i$2 = 0; i$2 < nodes.length; i$2++) {
+              var childNode = nodes[i$2];
+              var childNodeData = childNode[0];
+    
               if(childNodeData !== undefined) {
                 update(results, resultIndexes, increment, childNodeData);
               }
     
-              for(var char in childNode) {
-                nodeStack.push(childNode[char]);
+              for(var j$1 = 1; j$1 < childNode.length; j$1++) {
+                var grandChildNode = childNode[j$1];
+                if(grandChildNode !== undefined) {
+                  nodes.push(grandChildNode);
+                }
               }
             }
           }
@@ -158,56 +163,107 @@
     }
     
     Wade.index = function(data) {
-      var dataLength = data.length;
-      var index = {};
-      var nodes = [];
+      var dataLength = 0;
+      var minimumByte = 256;
+      var maximumByte = -1;
+      var processed = [];
     
-      for(var i = 0; i < dataLength; i++) {
+      for(var i = 0; i < data.length; i++) {
         var entry = processEntry(data[i]);
+    
         if(entry.length !== 0) {
           var terms = getTerms(entry);
           var termsLength = terms.length;
     
           for(var j = 0; j < termsLength; j++) {
             var term = terms[j];
-            var termLength = term.length - 1;
+            var processedTerm = [i];
             var node = index;
     
-            for(var n = 0; n < termLength; n++) {
-              var char = term[n];
-              var existingNode = node[char];
+            for(var n = 0; n < term.length; n++) {
+              var char = term.charCodeAt(n);
+              var highByte = char >>> 8;
+              var lowByte = char & 0xFF;
     
-              if(existingNode === undefined) {
-                existingNode = node[char] = {};
+              if(highByte !== 0) {
+                if(highByte < minimumByte) {
+                  minimumByte = highByte;
+                }
+    
+                if(highByte > maximumByte) {
+                  maximumByte = highByte;
+                }
+    
+                processedTerm.push(highByte);
               }
     
-              node = existingNode;
-            }
-    
-            var lastChar = term[termLength];
-            if(node[lastChar] === undefined) {
-              node = node[lastChar] = {
-                data: [1 / termsLength, i]
-              };
-              nodes.push(node);
-            } else {
-              node = node[lastChar];
-              var nodeData = node.data;
-    
-              if(nodeData === undefined) {
-                node.data = [1 / termsLength, i];
-                nodes.push(node);
-              } else {
-                nodeData[0] += 1 / termsLength;
-                nodeData.push(i);
+              if(lowByte < minimumByte) {
+                minimumByte = lowByte;
               }
+    
+              if(lowByte > maximumByte) {
+                maximumByte = lowByte;
+              }
+    
+              processedTerm.push(lowByte);
             }
+    
+            processed.push(termsLength);
+            processed.push(processedTerm);
+          }
+    
+          dataLength++;
+        }
+      }
+    
+      var offset = 1 - minimumByte;
+      var size = maximumByte - minimumByte + 2;
+    
+      if(size < 0) {
+        size = 1;
+      }
+    
+      var nodeDataSets = [];
+      var index = new Array(size);
+      index[0] = offset;
+    
+      for(var i$1 = 0; i$1 < processed.length; i$1 += 2) {
+        var termsLength$1 = processed[i$1];
+        var processedTerm$1 = processed[i$1 + 1];
+        var processedTermLength = processedTerm$1.length - 1;
+        var dataIndex = processedTerm$1[0];
+        var node$1 = index;
+    
+        for(var j$1 = 1; j$1 < processedTermLength; j$1++) {
+          var char$1 = processedTerm$1[j$1] + offset;
+          var existingNode = node$1[char$1];
+    
+          if(existingNode === undefined) {
+            existingNode = node$1[char$1] = new Array(size);
+          }
+    
+          node$1 = existingNode;
+        }
+    
+        var lastChar = processedTerm$1[processedTermLength] + offset;
+        if(node$1[lastChar] === undefined) {
+          node$1 = node$1[lastChar] = new Array(size);
+          nodeDataSets.push(node$1[0] = [1 / termsLength$1, dataIndex]);
+        } else {
+          node$1 = node$1[lastChar];
+          var nodeData = node$1[0];
+    
+          if(nodeData === undefined) {
+            nodeDataSets.push(node$1[0] = [1 / termsLength$1, dataIndex]);
+          } else {
+            nodeData[0] += 1 / termsLength$1;
+            nodeData.push(dataIndex);
           }
         }
       }
     
-      for(var i$1 = 0; i$1 < nodes.length; i$1++) {
-        var nodeData$1 = nodes[i$1].data;
+      for(var i$2 = 0; i$2 < nodeDataSets.length; i$2++) {
+        var nodeData$1 = nodeDataSets[i$2];
         nodeData$1[0] = 1.5 - (nodeData$1[0] / dataLength);
       }
     

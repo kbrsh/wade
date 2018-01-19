@@ -75,6 +75,7 @@ const update = function(results, resultIndexes, increment, data) {
 const Wade = function(data) {
   const search = function(query) {
     const index = search.index;
+    const offset = index[0];
     const processed = processEntry(query);
     let results = [];
     let resultIndexes = {};
@@ -92,13 +93,13 @@ const Wade = function(data) {
         let node = index;
 
         for(let j = 0; j < term.length; j++) {
-          node = node[term[j]];
+          node = node[term.charCodeAt(j) + offset];
           if(node === undefined) {
             continue exactOuter;
           }
         }
 
-        const nodeData = node.data;
+        const nodeData = node[0];
         if(nodeData !== undefined) {
           update(results, resultIndexes, increment, nodeData);
         }
@@ -108,23 +109,27 @@ const Wade = function(data) {
       let node = index;
 
       for(let i = 0; i < lastTerm.length; i++) {
-        node = node[lastTerm[i]];
+        node = node[lastTerm.charCodeAt(i) + offset];
         if(node === undefined) {
           break;
         }
       }
 
       if(node !== undefined) {
-        let nodeStack = [node];
-        let childNode;
-        while((childNode = nodeStack.pop())) {
-          const childNodeData = childNode.data;
+        let nodes = [node];
+        for(let i = 0; i < nodes.length; i++) {
+          let childNode = nodes[i];
+          const childNodeData = childNode[0];
+
           if(childNodeData !== undefined) {
             update(results, resultIndexes, increment, childNodeData);
           }
 
-          for(let char in childNode) {
-            nodeStack.push(childNode[char]);
+          for(let j = 1; j < childNode.length; j++) {
+            const grandChildNode = childNode[j];
+            if(grandChildNode !== undefined) {
+              nodes.push(grandChildNode);
+            }
           }
         }
       }
@@ -143,56 +148,107 @@ const Wade = function(data) {
 }
 
 Wade.index = function(data) {
-  const dataLength = data.length;
-  let index = {};
-  let nodes = [];
+  let dataLength = 0;
+  let minimumByte = 256;
+  let maximumByte = -1;
+  let processed = [];
 
-  for(let i = 0; i < dataLength; i++) {
+  for(let i = 0; i < data.length; i++) {
     const entry = processEntry(data[i]);
+
     if(entry.length !== 0) {
       const terms = getTerms(entry);
       const termsLength = terms.length;
 
       for(let j = 0; j < termsLength; j++) {
         const term = terms[j];
-        const termLength = term.length - 1;
+        let processedTerm = [i];
         let node = index;
 
-        for(let n = 0; n < termLength; n++) {
-          const char = term[n];
-          let existingNode = node[char];
+        for(let n = 0; n < term.length; n++) {
+          const char = term.charCodeAt(n);
+          const highByte = char >>> 8;
+          const lowByte = char & 0xFF;
 
-          if(existingNode === undefined) {
-            existingNode = node[char] = {};
+          if(highByte !== 0) {
+            if(highByte < minimumByte) {
+              minimumByte = highByte;
+            }
+
+            if(highByte > maximumByte) {
+              maximumByte = highByte;
+            }
+
+            processedTerm.push(highByte);
           }
 
-          node = existingNode;
-        }
-
-        const lastChar = term[termLength];
-        if(node[lastChar] === undefined) {
-          node = node[lastChar] = {
-            data: [1 / termsLength, i]
-          };
-          nodes.push(node);
-        } else {
-          node = node[lastChar];
-          const nodeData = node.data;
-
-          if(nodeData === undefined) {
-            node.data = [1 / termsLength, i];
-            nodes.push(node);
-          } else {
-            nodeData[0] += 1 / termsLength;
-            nodeData.push(i);
+          if(lowByte < minimumByte) {
+            minimumByte = lowByte;
           }
+
+          if(lowByte > maximumByte) {
+            maximumByte = lowByte;
+          }
+
+          processedTerm.push(lowByte);
         }
+
+        processed.push(termsLength);
+        processed.push(processedTerm);
+      }
+
+      dataLength++;
+    }
+  }
+
+  let offset = 1 - minimumByte;
+  let size = maximumByte - minimumByte + 2;
+
+  if(size < 0) {
+    size = 1;
+  }
+
+  let nodeDataSets = [];
+  let index = new Array(size);
+  index[0] = offset;
+
+  for(let i = 0; i < processed.length; i += 2) {
+    const termsLength = processed[i];
+    const processedTerm = processed[i + 1];
+    const processedTermLength = processedTerm.length - 1;
+    const dataIndex = processedTerm[0];
+    let node = index;
+
+    for(let j = 1; j < processedTermLength; j++) {
+      const char = processedTerm[j] + offset;
+      let existingNode = node[char];
+
+      if(existingNode === undefined) {
+        existingNode = node[char] = new Array(size);
+      }
+
+      node = existingNode;
+    }
+
+    const lastChar = processedTerm[processedTermLength] + offset;
+    if(node[lastChar] === undefined) {
+      node = node[lastChar] = new Array(size);
+      nodeDataSets.push(node[0] = [1 / termsLength, dataIndex]);
+    } else {
+      node = node[lastChar];
+      let nodeData = node[0];
+
+      if(nodeData === undefined) {
+        nodeDataSets.push(node[0] = [1 / termsLength, dataIndex]);
+      } else {
+        nodeData[0] += 1 / termsLength;
+        nodeData.push(dataIndex);
       }
     }
   }
 
-  for(let i = 0; i < nodes.length; i++) {
-    let nodeData = nodes[i].data;
+  for(let i = 0; i < nodeDataSets.length; i++) {
+    let nodeData = nodeDataSets[i];
     nodeData[0] = 1.5 - (nodeData[0] / dataLength);
   }
 
