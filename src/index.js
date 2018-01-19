@@ -26,6 +26,39 @@ let config = {
   ]
 };
 
+const stringify = function(arr) {
+  let output = '[';
+  let separator = '';
+  let empty = 0;
+
+  for(let i = 0; i < arr.length; i++) {
+    const element = arr[i];
+
+    if(element === undefined) {
+      empty++;
+    } else {
+      let elementOutput;
+
+      if(typeof element === "number") {
+        elementOutput = element.toString();
+      } else {
+        elementOutput = stringify(element);
+      }
+
+      if(empty > 0) {
+        output += separator + '@' + empty.toString();
+        empty = 0;
+        separator = ',';
+      }
+
+      output += separator + elementOutput;
+      separator = ',';
+    }
+  }
+
+  return output + ']';
+}
+
 const getTerms = function(entry) {
   let terms = entry.split(whitespaceRE);
 
@@ -255,7 +288,7 @@ Wade.index = function(data) {
 }
 
 Wade.save = function(search) {
-  return search.index;
+  return stringify(search.index);
 }
 
 Wade.config = config;

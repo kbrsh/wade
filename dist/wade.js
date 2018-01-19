@@ -41,6 +41,39 @@
       ]
     };
     
+    var stringify = function(arr) {
+      var output = '[';
+      var separator = '';
+      var empty = 0;
+    
+      for(var i = 0; i < arr.length; i++) {
+        var element = arr[i];
+    
+        if(element === undefined) {
+          empty++;
+        } else {
+          var elementOutput = (void 0);
+    
+          if(typeof element === "number") {
+            elementOutput = element.toString();
+          } else {
+            elementOutput = stringify(element);
+          }
+    
+          if(empty > 0) {
+            output += separator + '@' + empty.toString();
+            empty = 0;
+            separator = ',';
+          }
+    
+          output += separator + elementOutput;
+          separator = ',';
+        }
+      }
+    
+      return output + ']';
+    }
+    
     var getTerms = function(entry) {
       var terms = entry.split(whitespaceRE);
     
@@ -270,7 +303,7 @@
     }
     
     Wade.save = function(search) {
-      return search.index;
+      return stringify(search.index);
     }
     
     Wade.config = config;
