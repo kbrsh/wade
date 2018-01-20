@@ -1,7 +1,7 @@
 {
   "name": "wade",
   "version": "0.3.3",
-  "description": "Blazing fast, 1kb search library",
+  "description": "Fast 1kb search library",
   "main": "dist/wade.min.js",
   "scripts": {
     "build": "gulp",
