@@ -32,17 +32,13 @@ const stringify = function(arr) {
   let empty = 0;
 
   for(let i = 0; i < arr.length; i++) {
-    const element = arr[i];
+    let element = arr[i];
 
     if(element === undefined) {
       empty++;
     } else {
-      let elementOutput;
-
-      if(typeof element === "number") {
-        elementOutput = element.toString();
-      } else {
-        elementOutput = stringify(element);
+      if(typeof element !== "number") {
+        element = stringify(element);
       }
 
       if(empty > 0) {
@@ -51,12 +47,16 @@ const stringify = function(arr) {
         separator = ',';
       }
 
-      output += separator + elementOutput;
+      output += separator + element;
       separator = ',';
     }
   }
 
   return output + ']';
+}
+
+const parse = function(str) {
+
 }
 
 const getTerms = function(entry) {
@@ -88,8 +88,8 @@ const processEntry = function(entry) {
 }
 
 const update = function(results, resultIndexes, increment, data) {
-  const relevance = data[0];
-  for(let i = 1; i < data.length; i++) {
+  const relevance = data[1];
+  for(let i = 2; i < data.length; i++) {
     const index = data[i];
     const resultIndex = resultIndexes[index];
     if(resultIndex === undefined) {
@@ -108,7 +108,6 @@ const update = function(results, resultIndexes, increment, data) {
 const Wade = function(data) {
   const search = function(query) {
     const index = search.index;
-    const offset = index[0];
     const processed = processEntry(query);
     let results = [];
     let resultIndexes = {};
@@ -123,29 +122,39 @@ const Wade = function(data) {
 
       exactOuter: for(let i = 0; i < exactTermsLength; i++) {
         const term = terms[i];
+        const termLength = term.length - 1;
         let node = index;
 
-        for(let j = 0; j < term.length; j++) {
-          node = node[term.charCodeAt(j) + offset];
-          if(node === undefined) {
+        for(let j = 0; j <= termLength; j++) {
+          const termOffset = node[0][0];
+          const termIndex = term.charCodeAt(j) + termOffset;
+
+          if(termIndex < 1 || (termOffset === undefined && j === termLength) || node[termIndex] === undefined) {
             continue exactOuter;
           }
+
+          node = node[termIndex];
         }
 
         const nodeData = node[0];
-        if(nodeData !== undefined) {
+        if(nodeData.length !== 1) {
           update(results, resultIndexes, increment, nodeData);
         }
       }
 
       const lastTerm = terms[exactTermsLength];
+      const lastTermLength = lastTerm.length - 1;
       let node = index;
 
-      for(let i = 0; i < lastTerm.length; i++) {
-        node = node[lastTerm.charCodeAt(i) + offset];
-        if(node === undefined) {
+      for(let i = 0; i <= lastTermLength; i++) {
+        const lastTermOffset = node[0][0];
+        const lastTermIndex = lastTerm.charCodeAt(i) + lastTermOffset;
+
+        if(lastTermIndex < 1 || (lastTermOffset === undefined && i === lastTermLength) || node[lastTermIndex] === undefined) {
           break;
         }
+
+        node = node[lastTermIndex];
       }
 
       if(node !== undefined) {
@@ -154,7 +163,7 @@ const Wade = function(data) {
           let childNode = nodes[i];
           const childNodeData = childNode[0];
 
-          if(childNodeData !== undefined) {
+          if(childNodeData.length !== 1) {
             update(results, resultIndexes, increment, childNodeData);
           }
 
@@ -171,10 +180,10 @@ const Wade = function(data) {
     }
   }
 
-  if(Array.isArray(data) === true) {
+  if(Array.isArray(data)) {
     search.index = Wade.index(data);
   } else {
-    search.index = data;
+    search.index = parse(data);
   }
 
   return search;
@@ -182,8 +191,7 @@ const Wade = function(data) {
 
 Wade.index = function(data) {
   let dataLength = 0;
-  let minimumByte = 256;
-  let maximumByte = -1;
+  let ranges = {};
   let processed = [];
 
   for(let i = 0; i < data.length; i++) {
@@ -195,7 +203,8 @@ Wade.index = function(data) {
 
       for(let j = 0; j < termsLength; j++) {
         const term = terms[j];
-        let processedTerm = [i];
+        let processedTerm = [];
+        let currentRanges = ranges;
 
         for(let n = 0; n < term.length; n++) {
           const char = term.charCodeAt(n);
@@ -203,77 +212,116 @@ Wade.index = function(data) {
           const lowByte = char & 0xFF;
 
           if(highByte !== 0) {
-            if(highByte < minimumByte) {
-              minimumByte = highByte;
+            if(currentRanges.minimum === undefined || highByte < currentRanges.minimum) {
+              currentRanges.minimum = highByte;
             }
 
-            if(highByte > maximumByte) {
-              maximumByte = highByte;
+            if(currentRanges.maximum === undefined || highByte > currentRanges.maximum) {
+              currentRanges.maximum = highByte;
+            }
+
+            let nextRanges = currentRanges[highByte];
+            if(nextRanges === undefined) {
+              currentRanges = currentRanges[highByte] = {};
+            } else {
+              currentRanges = nextRanges;
             }
 
             processedTerm.push(highByte);
           }
 
-          if(lowByte < minimumByte) {
-            minimumByte = lowByte;
+          if(currentRanges.minimum === undefined || lowByte < currentRanges.minimum) {
+            currentRanges.minimum = lowByte;
           }
 
-          if(lowByte > maximumByte) {
-            maximumByte = lowByte;
+          if(currentRanges.maximum === undefined || lowByte > currentRanges.maximum) {
+            currentRanges.maximum = lowByte;
+          }
+
+          let nextRanges = currentRanges[lowByte];
+          if(nextRanges === undefined) {
+            currentRanges = currentRanges[lowByte] = {};
+          } else {
+            currentRanges = nextRanges;
           }
 
           processedTerm.push(lowByte);
         }
 
+        processed.push(i);
         processed.push(termsLength);
         processed.push(processedTerm);
       }
-
-      dataLength++;
     }
+
+    dataLength++;
   }
 
-  let offset = 1 - minimumByte;
-  let size = maximumByte - minimumByte + 2;
+  const indexMinimum = ranges.minimum;
+  const indexMaximum = ranges.maximum;
+  let indexSize = 1;
+  let indexOffset;
 
-  if(size < 0) {
-    size = 1;
+  if(indexMinimum !== undefined && indexMaximum !== undefined) {
+    indexSize = indexMaximum - indexMinimum + 2;
+    indexOffset = 1 - indexMinimum;
   }
 
   let nodeDataSets = [];
-  let index = new Array(size);
-  index[0] = offset;
+  let index = new Array(indexSize);
+  index[0] = [indexOffset];
 
-  for(let i = 0; i < processed.length; i += 2) {
-    const termsLength = processed[i];
-    const processedTerm = processed[i + 1];
+  for(let i = 0; i < processed.length; i += 3) {
+    const dataIndex = processed[i];
+    const termsLength = processed[i + 1];
+    const processedTerm = processed[i + 2];
     const processedTermLength = processedTerm.length - 1;
-    const dataIndex = processedTerm[0];
     let node = index;
+    let termRanges = ranges;
 
-    for(let j = 1; j < processedTermLength; j++) {
-      const char = processedTerm[j] + offset;
-      let existingNode = node[char];
+    for(let j = 0; j < processedTermLength; j++) {
+      const char = processedTerm[j];
+      const charIndex = char + node[0][0];
+      let termNode = node[charIndex];
+      termRanges = termRanges[char];
 
-      if(existingNode === undefined) {
-        existingNode = node[char] = new Array(size);
+      if(termNode === undefined) {
+        const termMinimum = termRanges.minimum;
+        const termMaximum = termRanges.maximum;
+        termNode = node[charIndex] = new Array(termMaximum - termMinimum + 2);
+        termNode[0] = [1 - termMinimum];
       }
 
-      node = existingNode;
+      node = termNode;
     }
 
-    const lastChar = processedTerm[processedTermLength] + offset;
-    if(node[lastChar] === undefined) {
-      node = node[lastChar] = new Array(size);
-      nodeDataSets.push(node[0] = [1 / termsLength, dataIndex]);
-    } else {
-      node = node[lastChar];
-      let nodeData = node[0];
+    const lastChar = processedTerm[processedTermLength];
+    const lastCharIndex = lastChar + node[0][0]
+    let lastTermNode = node[lastCharIndex];
+    termRanges = termRanges[lastChar];
 
-      if(nodeData === undefined) {
-        nodeDataSets.push(node[0] = [1 / termsLength, dataIndex]);
+    if(lastTermNode === undefined) {
+      const lastTermMinimum = termRanges.minimum;
+      const lastTermMaximum = termRanges.maximum;
+      let lastTermSize = 1;
+      let lastTermOffset;
+
+      if(lastTermMinimum !== undefined && lastTermMaximum !== undefined) {
+        lastTermSize = lastTermMaximum - lastTermMinimum + 2;
+        lastTermOffset = 1 - lastTermMinimum;
+      }
+
+      lastTermNode = node[lastCharIndex] = new Array(lastTermSize);
+      nodeDataSets.push(lastTermNode[0] = [lastTermOffset, 1 / termsLength, dataIndex]);
+    } else {
+      let nodeData = lastTermNode[0];
+
+      if(nodeData.length === 1) {
+        nodeData.push(1 / termsLength);
+        nodeData.push(dataIndex);
+        nodeDataSets.push(nodeData);
       } else {
-        nodeData[0] += 1 / termsLength;
+        nodeData[1] += 1 / termsLength;
         nodeData.push(dataIndex);
       }
     }
@@ -281,7 +329,7 @@ Wade.index = function(data) {
 
   for(let i = 0; i < nodeDataSets.length; i++) {
     let nodeData = nodeDataSets[i];
-    nodeData[0] = 1.5 - (nodeData[0] / dataLength);
+    nodeData[1] = 1.5 - (nodeData[1] / dataLength);
   }
 
   return index;

@@ -52,12 +52,8 @@
         if(element === undefined) {
           empty++;
         } else {
-          var elementOutput = (void 0);
-    
-          if(typeof element === "number") {
-            elementOutput = element.toString();
-          } else {
-            elementOutput = stringify(element);
+          if(typeof element !== "number") {
+            element = stringify(element);
           }
     
           if(empty > 0) {
@@ -66,12 +62,16 @@
             separator = ',';
           }
     
-          output += separator + elementOutput;
+          output += separator + element;
           separator = ',';
         }
       }
     
       return output + ']';
+    }
+    
+    var parse = function(str) {
+    
     }
     
     var getTerms = function(entry) {
@@ -103,8 +103,8 @@
     }
     
     var update = function(results, resultIndexes, increment, data) {
-      var relevance = data[0];
-      for(var i = 1; i < data.length; i++) {
+      var relevance = data[1];
+      for(var i = 2; i < data.length; i++) {
         var index = data[i];
         var resultIndex = resultIndexes[index];
         if(resultIndex === undefined) {
@@ -123,7 +123,6 @@
     var Wade = function(data) {
       var search = function(query) {
         var index = search.index;
-        var offset = index[0];
         var processed = processEntry(query);
         var results = [];
         var resultIndexes = {};
@@ -138,29 +137,39 @@
     
           exactOuter: for(var i = 0; i < exactTermsLength; i++) {
             var term = terms[i];
+            var termLength = term.length - 1;
             var node = index;
     
-            for(var j = 0; j < term.length; j++) {
-              node = node[term.charCodeAt(j) + offset];
-              if(node === undefined) {
+            for(var j = 0; j <= termLength; j++) {
+              var termOffset = node[0][0];
+              var termIndex = term.charCodeAt(j) + termOffset;
+    
+              if(termIndex < 1 || (termOffset === undefined && j === termLength) || node[termIndex] === undefined) {
                 continue exactOuter;
               }
+    
+              node = node[termIndex];
             }
     
             var nodeData = node[0];
-            if(nodeData !== undefined) {
+            if(nodeData.length !== 1) {
               update(results, resultIndexes, increment, nodeData);
             }
           }
     
           var lastTerm = terms[exactTermsLength];
+          var lastTermLength = lastTerm.length - 1;
           var node$1 = index;
     
-          for(var i$1 = 0; i$1 < lastTerm.length; i$1++) {
-            node$1 = node$1[lastTerm.charCodeAt(i$1) + offset];
-            if(node$1 === undefined) {
+          for(var i$1 = 0; i$1 <= lastTermLength; i$1++) {
+            var lastTermOffset = node$1[0][0];
+            var lastTermIndex = lastTerm.charCodeAt(i$1) + lastTermOffset;
+    
+            if(lastTermIndex < 1 || (lastTermOffset === undefined && i$1 === lastTermLength) || node$1[lastTermIndex] === undefined) {
               break;
             }
+    
+            node$1 = node$1[lastTermIndex];
           }
     
           if(node$1 !== undefined) {
@@ -169,7 +178,7 @@
               var childNode = nodes[i$2];
               var childNodeData = childNode[0];
     
-              if(childNodeData !== undefined) {
+              if(childNodeData.length !== 1) {
                 update(results, resultIndexes, increment, childNodeData);
               }
     
@@ -186,10 +195,10 @@
         }
       }
     
-      if(Array.isArray(data) === true) {
+      if(Array.isArray(data)) {
         search.index = Wade.index(data);
       } else {
-        search.index = data;
+        search.index = parse(data);
       }
     
       return search;
@@ -197,8 +206,7 @@
     
     Wade.index = function(data) {
       var dataLength = 0;
-      var minimumByte = 256;
-      var maximumByte = -1;
+      var ranges = {};
       var processed = [];
     
       for(var i = 0; i < data.length; i++) {
@@ -210,7 +218,8 @@
     
           for(var j = 0; j < termsLength; j++) {
             var term = terms[j];
-            var processedTerm = [i];
+            var processedTerm = [];
+            var currentRanges = ranges;
     
             for(var n = 0; n < term.length; n++) {
               var char = term.charCodeAt(n);
@@ -218,77 +227,116 @@
               var lowByte = char & 0xFF;
     
               if(highByte !== 0) {
-                if(highByte < minimumByte) {
-                  minimumByte = highByte;
+                if(currentRanges.minimum === undefined || highByte < currentRanges.minimum) {
+                  currentRanges.minimum = highByte;
                 }
     
-                if(highByte > maximumByte) {
-                  maximumByte = highByte;
+                if(currentRanges.maximum === undefined || highByte > currentRanges.maximum) {
+                  currentRanges.maximum = highByte;
+                }
+    
+                var nextRanges = currentRanges[highByte];
+                if(nextRanges === undefined) {
+                  currentRanges = currentRanges[highByte] = {};
+                } else {
+                  currentRanges = nextRanges;
                 }
     
                 processedTerm.push(highByte);
               }
     
-              if(lowByte < minimumByte) {
-                minimumByte = lowByte;
+              if(currentRanges.minimum === undefined || lowByte < currentRanges.minimum) {
+                currentRanges.minimum = lowByte;
               }
     
-              if(lowByte > maximumByte) {
-                maximumByte = lowByte;
+              if(currentRanges.maximum === undefined || lowByte > currentRanges.maximum) {
+                currentRanges.maximum = lowByte;
+              }
+    
+              var nextRanges$1 = currentRanges[lowByte];
+              if(nextRanges$1 === undefined) {
+                currentRanges = currentRanges[lowByte] = {};
+              } else {
+                currentRanges = nextRanges$1;
               }
     
               processedTerm.push(lowByte);
             }
     
+            processed.push(i);
             processed.push(termsLength);
             processed.push(processedTerm);
           }
-    
-          dataLength++;
         }
+    
+        dataLength++;
       }
     
-      var offset = 1 - minimumByte;
-      var size = maximumByte - minimumByte + 2;
+      var indexMinimum = ranges.minimum;
+      var indexMaximum = ranges.maximum;
+      var indexSize = 1;
+      var indexOffset;
     
-      if(size < 0) {
-        size = 1;
+      if(indexMinimum !== undefined && indexMaximum !== undefined) {
+        indexSize = indexMaximum - indexMinimum + 2;
+        indexOffset = 1 - indexMinimum;
       }
     
       var nodeDataSets = [];
-      var index = new Array(size);
-      index[0] = offset;
+      var index = new Array(indexSize);
+      index[0] = [indexOffset];
     
-      for(var i$1 = 0; i$1 < processed.length; i$1 += 2) {
-        var termsLength$1 = processed[i$1];
-        var processedTerm$1 = processed[i$1 + 1];
+      for(var i$1 = 0; i$1 < processed.length; i$1 += 3) {
+        var dataIndex = processed[i$1];
+        var termsLength$1 = processed[i$1 + 1];
+        var processedTerm$1 = processed[i$1 + 2];
         var processedTermLength = processedTerm$1.length - 1;
-        var dataIndex = processedTerm$1[0];
         var node = index;
+        var termRanges = ranges;
     
-        for(var j$1 = 1; j$1 < processedTermLength; j$1++) {
-          var char$1 = processedTerm$1[j$1] + offset;
-          var existingNode = node[char$1];
+        for(var j$1 = 0; j$1 < processedTermLength; j$1++) {
+          var char$1 = processedTerm$1[j$1];
+          var charIndex = char$1 + node[0][0];
+          var termNode = node[charIndex];
+          termRanges = termRanges[char$1];
     
-          if(existingNode === undefined) {
-            existingNode = node[char$1] = new Array(size);
+          if(termNode === undefined) {
+            var termMinimum = termRanges.minimum;
+            var termMaximum = termRanges.maximum;
+            termNode = node[charIndex] = new Array(termMaximum - termMinimum + 2);
+            termNode[0] = [1 - termMinimum];
           }
     
-          node = existingNode;
+          node = termNode;
         }
     
-        var lastChar = processedTerm$1[processedTermLength] + offset;
-        if(node[lastChar] === undefined) {
-          node = node[lastChar] = new Array(size);
-          nodeDataSets.push(node[0] = [1 / termsLength$1, dataIndex]);
-        } else {
-          node = node[lastChar];
-          var nodeData = node[0];
+        var lastChar = processedTerm$1[processedTermLength];
+        var lastCharIndex = lastChar + node[0][0]
+        var lastTermNode = node[lastCharIndex];
+        termRanges = termRanges[lastChar];
     
-          if(nodeData === undefined) {
-            nodeDataSets.push(node[0] = [1 / termsLength$1, dataIndex]);
+        if(lastTermNode === undefined) {
+          var lastTermMinimum = termRanges.minimum;
+          var lastTermMaximum = termRanges.maximum;
+          var lastTermSize = 1;
+          var lastTermOffset = (void 0);
+    
+          if(lastTermMinimum !== undefined && lastTermMaximum !== undefined) {
+            lastTermSize = lastTermMaximum - lastTermMinimum + 2;
+            lastTermOffset = 1 - lastTermMinimum;
+          }
+    
+          lastTermNode = node[lastCharIndex] = new Array(lastTermSize);
+          nodeDataSets.push(lastTermNode[0] = [lastTermOffset, 1 / termsLength$1, dataIndex]);
+        } else {
+          var nodeData = lastTermNode[0];
+    
+          if(nodeData.length === 1) {
+            nodeData.push(1 / termsLength$1);
+            nodeData.push(dataIndex);
+            nodeDataSets.push(nodeData);
           } else {
-            nodeData[0] += 1 / termsLength$1;
+            nodeData[1] += 1 / termsLength$1;
             nodeData.push(dataIndex);
           }
         }
@@ -296,7 +344,7 @@
     
       for(var i$2 = 0; i$2 < nodeDataSets.length; i$2++) {
         var nodeData$1 = nodeDataSets[i$2];
-        nodeData$1[0] = 1.5 - (nodeData$1[0] / dataLength);
+        nodeData$1[1] = 1.5 - (nodeData$1[1] / dataLength);
       }
     
       return index;
