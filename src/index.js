@@ -56,7 +56,49 @@ const stringify = function(arr) {
 }
 
 const parse = function(str) {
+  let arr = [];
+  let stack = [arr];
+  let currentIndex = 1;
 
+  while(stack.length !== 0) {
+    let currentArr = stack[stack.length - 1];
+    let element = '';
+
+    for(; currentIndex < str.length; currentIndex++) {
+      const char = str[currentIndex];
+      if(char === ',') {
+        if(element.length !== 0) {
+          if(element[0] === '@') {
+            const elementInt = parseInt(element.substring(1));
+            for(let i = 0; i < elementInt; i++) {
+              currentArr.push(undefined);
+            }
+          } else {
+            currentArr.push(parseFloat(element));
+          }
+          element = '';
+        }
+      } else if(char === '[') {
+        let childArr = [];
+        currentArr.push(childArr);
+        stack.push(childArr);
+        currentIndex++;
+        break;
+      } else if(char === ']') {
+        stack.pop();
+        currentIndex++;
+        break;
+      } else {
+        element += char;
+      }
+    }
+
+    if(element.length !== 0) {
+      currentArr.push(parseInt(element));
+    }
+  }
+
+  return arr;
 }
 
 const getTerms = function(entry) {

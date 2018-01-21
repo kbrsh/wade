@@ -71,7 +71,49 @@
     }
     
     var parse = function(str) {
+      var arr = [];
+      var stack = [arr];
+      var currentIndex = 1;
     
+      while(stack.length !== 0) {
+        var currentArr = stack[stack.length - 1];
+        var element = '';
+    
+        for(; currentIndex < str.length; currentIndex++) {
+          var char = str[currentIndex];
+          if(char === ',') {
+            if(element.length !== 0) {
+              if(element[0] === '@') {
+                var elementInt = parseInt(element.substring(1));
+                for(var i = 0; i < elementInt; i++) {
+                  currentArr.push(undefined);
+                }
+              } else {
+                currentArr.push(parseFloat(element));
+              }
+              element = '';
+            }
+          } else if(char === '[') {
+            var childArr = [];
+            currentArr.push(childArr);
+            stack.push(childArr);
+            currentIndex++;
+            break;
+          } else if(char === ']') {
+            stack.pop();
+            currentIndex++;
+            break;
+          } else {
+            element += char;
+          }
+        }
+    
+        if(element.length !== 0) {
+          currentArr.push(parseInt(element));
+        }
+      }
+    
+      return arr;
     }
     
     var getTerms = function(entry) {
