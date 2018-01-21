@@ -43,26 +43,26 @@ Combined with JavaScript libraries like [Moon](http://moonjs.ga), you can create
 
 ### Loading/Saving Index
 
-To save an index as an object, use `Wade.save` on a search function.
+To save an index as a String, use `Wade.save` on a search function.
 
 For example:
 
 ```js
 // Create the search function
 const search = Wade(["Apple", "Lemon", "Orange", "Tomato"]);
-const instance = Wade.save(search);
+const index = Wade.save(search);
 
-// Save `instance`
+// Save `index`
 ```
 
 Later, you can get the same search function without having Wade recreate an index every time by doing:
 
 ```js
-// Retrieve `instance`, then
-const search = Wade(instance);
+// Retrieve `index`, then
+const search = Wade(index);
 ```
 
-`instance` can be saved to a file using using `JSON.stringify()` and loaded with `JSON.parse()`.
+`index` is a String and can be saved to a file.
 
 ### Processors
 
