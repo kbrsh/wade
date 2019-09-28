@@ -109,7 +109,7 @@ First, an index is generated from the data. When performing a search, the follow
 * Each term except the last is searched for exactly and scores for each item in the data are updated according to the relevance of the term to the data.
 * The last keyword is treated as a prefix, and Wade performs a depth-first search and updates the score for all data prefixed with this term using the relevance weight for the term. This allows for searching as a user types.
 
-In-depth explanations of the algorithm are available on the [blog post](https://blog.kabir.ml/posts/inside-wade.html) and [pdf](https://github.com/kbrsh/wade/blob/master/Wade.pdf).
+In-depth explanations of the algorithm are available on the [blog post](https://blog.kabir.sh/posts/inside-wade.html) and [pdf](https://github.com/kbrsh/wade/blob/master/Wade.pdf).
 
 ### Support
 
