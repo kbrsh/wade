@@ -39,7 +39,7 @@ search("App");
 */
 ```
 
-Combined with JavaScript libraries like [Moon](http://moonjs.ga), you can create a [real-time search](http://moonjs.ga/examples/search/index.html).
+Combined with JavaScript libraries like [Moon](https://github.com/kbrsh/moon), you can create a [real-time search](https://kbrsh.github.io/moon/doc/examples.html).
 
 ### Loading/Saving Index
 
